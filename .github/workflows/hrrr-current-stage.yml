@@ -1,0 +1,41 @@
+name: HRRR recent-pair scientific staging (not published)
+on:
+  push:
+    branches: [feat/hrrr-current-cycle-staging]
+    paths:
+      - 'pipelines/hrrr_stage.py'
+      - 'pipelines/tests/test_hrrr_stage.py'
+      - '.github/workflows/hrrr-current-stage.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned scientific GRIB and GIS stack
+        run: python -m pip install 'eccodes==2.44.0' 'numpy==2.2.6' 'scipy==1.15.3' 'rasterio==1.4.3' 'Pillow==11.2.1'
+      - name: Unit tests, including full geospatial math
+        run: |
+          python -m unittest pipelines.tests.test_hrrr_inventory pipelines.tests.test_hrrr_stage pipelines.tests.test_hrrr_georeg -v
+      - name: Select verified actual recent NOAA HRRR pair, decode, QA and stage
+        run: |
+          python -m pipelines.hrrr_stage --out reports/recent-hrrr > /tmp/staging-run.json
+          python - <<'PY'
+          import json
+          m=json.load(open("reports/recent-hrrr/manifest.json"))
+          print(json.dumps({k:m[k] for k in ("status","validAt","transferBytes","derivedBytes","wallSeconds","independentForecastVerification")},indent=2))
+          PY
+      - name: Audit stage output only, no website or repo changes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-recent-pair-staging
+          path: reports/recent-hrrr/
+          if-no-files-found: warn
+          retention-days: 7
