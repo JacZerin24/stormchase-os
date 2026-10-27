@@ -89,11 +89,44 @@ def mean_wind(levels: list[Wind], bottom_m: float, top_m: float) -> tuple[float,
     )
 
 
-def bunkers_motion(levels: list[Wind]) -> dict[str, tuple[float,float]]:
-    """Documented 0–6 km mean; low 0–0.5, high 5.5–6 km; 7.5 m/s orthogonal."""
-    u,v=mean_wind(levels,0,6000)
-    lo_u,lo_v=mean_wind(levels,0,500)
-    hi_u,hi_v=mean_wind(levels,5500,6000)
+def bunkers_motion(levels: list[Wind], pressure_hpa: list[float]) -> dict[str, tuple[float,float]]:
+    """Bunkers (2000) 0–6 km storm motion with pressure-coordinate wind averaging.
+
+    Uses trapezoidal integration of u/v over pressure, as implemented in
+    MetPy 1.7.1 weighted_continuous_average. Pressure is mandatory; we must
+    NOT quietly substitute height weighting and call it the same calculation.
+    AGL wind heights, pressure and vector measurements must be co-located.
+    """
+    checked(levels)
+    if len(pressure_hpa) != len(levels):
+        raise ValueError("Pressure array length must match wind profile")
+    if not all(isfinite(p) and p > 0 for p in pressure_hpa):
+        raise ValueError("Positive, finite pressure required at every wind level")
+    if any(b >= a for a,b in zip(pressure_hpa,pressure_hpa[1:])):
+        raise ValueError("Pressure must decrease strictly with increasing height")
+
+    def p_at(z: float) -> float:
+        for i,(lo,hi) in enumerate(zip(levels,levels[1:])):
+            if lo.z_agl_m <= z <= hi.z_agl_m:
+                fraction=(z-lo.z_agl_m)/(hi.z_agl_m-lo.z_agl_m)
+                return pressure_hpa[i]+fraction*(pressure_hpa[i+1]-pressure_hpa[i])
+        raise ValueError("Profile does not span the requested Bunkers layer")
+
+    def pressure_mean(bottom: float, top: float) -> tuple[float,float]:
+        winds=layer(levels,bottom,top)
+        pressures=[p_at(w.z_agl_m) for w in winds]
+        delta=pressures[-1]-pressures[0]
+        if delta >= 0:
+            raise ValueError("Non-decreasing pressure over requested layer")
+        weighted_u=sum((a.u_ms+b.u_ms)*0.5*(p1-p0)
+                       for a,b,p0,p1 in zip(winds,winds[1:],pressures,pressures[1:]))
+        weighted_v=sum((a.v_ms+b.v_ms)*0.5*(p1-p0)
+                       for a,b,p0,p1 in zip(winds,winds[1:],pressures,pressures[1:]))
+        return weighted_u/delta,weighted_v/delta
+
+    u,v=pressure_mean(0,6000)
+    lo_u,lo_v=pressure_mean(0,500)
+    hi_u,hi_v=pressure_mean(5500,6000)
     du,dv=hi_u-lo_u,hi_v-lo_v
     mag=hypot(du,dv)
     if mag < 1e-9:
