@@ -292,3 +292,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   .sidebar { transition: none; }
   .track > span { transition: none; }
 }
+
+
+/* Scientific archive lab: separate from live SPC/NWS data status. */
+.model-archive-panel { border-left: 3px solid var(--accent); }
+.model-focus {
+  width: 100%; min-height: 38px; margin-top: 12px; color: var(--accent);
+  border: 1px solid var(--line-strong); background: var(--input); border-radius: 2px;
+  font: 600 10px var(--mono); letter-spacing: .4px;
+}
+.model-focus:hover { border-color: var(--accent); }
+.archive-map-banner {
+  position: absolute; z-index: 3; left: 24px; bottom: 48px;
+  max-width: calc(100% - 48px); padding: 11px 13px;
+  background: var(--glass); border: 1px solid var(--accent);
+  color: var(--text); font: 700 10px var(--mono); letter-spacing: .4px;
+  pointer-events: none;
+}
+.archive-map-banner span { display: block; margin-top: 4px; color: var(--accent); font-weight: 500; }
+@media (max-width: 600px) {
+  .archive-map-banner { left: 12px; bottom: 105px; font-size: 9px; max-width: calc(100% - 24px); }
+}
