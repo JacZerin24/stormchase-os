@@ -16,4 +16,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python -m unittest discover -s research/tests -v
+      - name: Install pinned MetPy reference implementation
+        run: python -m pip install metpy==1.7.1
+      - name: Analytical plus independent MetPy reference tests
+        run: python -m unittest discover -s research/tests -v
