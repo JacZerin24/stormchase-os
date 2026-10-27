@@ -35,6 +35,11 @@ async def exercise(browser,mobile:bool)->dict:
         for key in KEYS:
             await panel.locator('#convective-field-select').select_option(key)
             await page.locator('.archive-map-banner').wait_for(timeout=10000)
+            if not await panel.locator('.legend-color-ramp').is_visible():
+                raise AssertionError('Fixed scientific forecast legend not visible for '+key)
+            ticks=await panel.locator('.legend-color-ticks span').all_text_contents()
+            if len(ticks)!=3 or any(not value.strip() for value in ticks):
+                raise AssertionError('Forecast legend has no intelligible numeric scale')
             banner=await page.locator('.archive-map-banner').inner_text()
             if 'ARCHIVED' not in banner or 'NOT CURRENT' not in banner:
                 raise AssertionError('Archived forecast not distinctly identified')
