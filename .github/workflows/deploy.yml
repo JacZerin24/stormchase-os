@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -24,6 +25,27 @@ jobs:
           npm run typecheck
           npm test
         working-directory: web
+      - name: Restore last successful HRRR model cache (fail rather than silently erase)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          runs="$(gh run list --workflow hrrr-live-publish.yml --branch main --status success --limit 10 --json databaseId --jq '.[].databaseId')"
+          if [ -n "$runs" ]; then
+            mkdir -p web/public/live/hrrr
+            found=false
+            for run in $runs; do
+              if gh run download "$run" -n hrrr-live-cache -D web/public/live/hrrr; then
+                python -c 'from pathlib import Path;from pipelines.hrrr_pages_cache import verify;verify(Path("web/public/live/hrrr"))'
+                found=true
+                break
+              fi
+            done
+            if [ "$found" != true ]; then
+              echo "Prior live model assets unavailable; blocking unintended Pages rollback"
+              exit 1
+            fi
+          fi
       - name: Build Pages bundle
         run: npm run build
         working-directory: web

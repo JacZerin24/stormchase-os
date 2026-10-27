@@ -1,0 +1,120 @@
+name: HRRR regional forecast publisher (research beta)
+on:
+  schedule:
+    - cron: '48 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main, feat/hrrr-live-controlled-publisher]
+    paths:
+      - 'pipelines/hrrr_live_pack.py'
+      - 'pipelines/hrrr_pages_cache.py'
+      - 'pipelines/grib_inspect.py'
+      - 'pipelines/tests/test_hrrr_live_pack.py'
+      - 'pipelines/tests/test_hrrr_pages_cache.py'
+      - '.github/workflows/hrrr-live-publish.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: hrrr-model-publication
+  cancel-in-progress: false
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pipelines/requirements-hrrr-pinned.txt
+      - name: Install pinned native GRIB and GIS stack
+        run: python -m pip install -r pipelines/requirements-hrrr-pinned.txt
+      - name: Source, geospatial, caching and publication tests
+        run: |
+          python -X faulthandler -m unittest pipelines.tests.test_hrrr_inventory pipelines.tests.test_hrrr_stage pipelines.tests.test_hrrr_georeg pipelines.tests.test_hrrr_live_pack pipelines.tests.test_hrrr_pages_cache -v
+      - name: Prepare HRRR pair only when authentic sources pass QA
+        run: python -m pipelines.hrrr_live_pack --out /tmp/hrrr-candidate
+      - name: Recover short-lived previously verified cache, if any
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/hrrr-cache
+          for run in $(gh run list --workflow hrrr-live-publish.yml --branch main --status success --limit 12 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$run" -n hrrr-live-cache -D /tmp/hrrr-cache; then
+              echo "Recovered last model cache from run $run"
+              break
+            fi
+            rm -rf /tmp/hrrr-cache
+            mkdir -p /tmp/hrrr-cache
+          done
+      - name: Verify source hashes, immutable paths and bounded cache
+        run: |
+          python -m pipelines.hrrr_pages_cache --candidate /tmp/hrrr-candidate --cache /tmp/hrrr-cache
+          python - <<'PY'
+          from pathlib import Path
+          from pipelines.hrrr_pages_cache import verify
+          result=verify(Path("/tmp/hrrr-cache"))
+          print("Latest forecast valid:",result["snapshots"][0]["validAt"])
+          print("Retained valid-hour snapshots:",len(result["snapshots"]))
+          PY
+      - name: Store regional model assets only, no raw GRIB
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-live-cache
+          path: /tmp/hrrr-cache/
+          if-no-files-found: error
+          retention-days: 7
+  build:
+    if: github.ref == 'refs/heads/main'
+    needs: produce
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Restore this run's verified model cache
+        uses: actions/download-artifact@v4
+        with:
+          name: hrrr-live-cache
+          path: web/public/live/hrrr
+      - name: Validate publisher cache again before deployment
+        run: python -c 'from pathlib import Path;from pipelines.hrrr_pages_cache import verify;verify(Path("web/public/live/hrrr"))'
+      - name: Install locked frontend and run CI
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm test
+      - name: Build verified Pages bundle
+        working-directory: web
+        env:
+          GITHUB_PAGES: 'true'
+        run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: web/dist
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

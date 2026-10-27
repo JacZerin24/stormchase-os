@@ -28,7 +28,7 @@ export interface PilotManifest {
   differenceImage:string;
   difference_sha256:string;
 }
-export interface PilotOverlay {url:string;bounds:[number,number,number,number];kind:PilotMode|'convective'}
+export interface PilotOverlay {url:string;bounds:[number,number,number,number];kind:PilotMode|'convective'|'live'}
 function object(x:unknown):x is Record<string,unknown>{
   return typeof x==='object'&&x!==null&&!Array.isArray(x);
 }
