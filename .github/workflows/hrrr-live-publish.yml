@@ -41,7 +41,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p /tmp/hrrr-cache
-          for run in $(gh run list --workflow hrrr-live-publish.yml --status success --limit 12 --json databaseId --jq '.[].databaseId'); do
+          for run in $(gh run list --workflow hrrr-live-publish.yml --branch main --status success --limit 12 --json databaseId --jq '.[].databaseId'); do
             if gh run download "$run" -n hrrr-live-cache -D /tmp/hrrr-cache; then
               echo "Recovered last model cache from run $run"
               break
