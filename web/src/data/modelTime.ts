@@ -69,9 +69,8 @@ export function parseModelFieldAsset(input:unknown):ModelFieldAsset {
   }
   const format=d.assetFormat;
   if(format!==null && format!=='cog'&&format!=='raster-tiles'&&format!=='geojson')throw new Error('Unsupported asset format');
-  const assetUrl=d.assetUrl;
+  const assetUrl: string|null=d.assetUrl===null ? null : string(d.assetUrl,'assetUrl');
   if(assetUrl!==null) {
-    string(assetUrl,'assetUrl');
     if(!(assetUrl.startsWith('/')&&!assetUrl.startsWith('//'))&&!/^https:\/\//.test(assetUrl)){
       throw new Error('Asset URL must be absolute HTTPS or local root path');
     }
