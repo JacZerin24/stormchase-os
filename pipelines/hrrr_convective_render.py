@@ -33,6 +33,17 @@ RANGES={
   'cape_sb':(0,20000),
   'srh01':(-3000,3000),
 }
+# Explicit native GRIB identities established by this real historical run.
+# UH product is known in the NOAA catalog, but ecCodes reports its local
+# parameter shortName/units as 'unknown'; never claim native-unit QC passed.
+EXPECTED_NATIVE={
+    'refc':('atmosphere',0,'dB'),
+    'hgt500':('isobaricInhPa',500,'gpm'),
+    't700':('isobaricInhPa',700,'K'),
+    'cape_sb':('surface',0,'J kg**-1'),
+    'srh01':('heightAboveGroundLayer',1000,'m**2 s**-2'),
+    'uh25_max':('heightAboveGroundLayer',5000,'unknown'),
+}
 COLOR={
     'refc':([-10,5,15,25,35,45,55,65,75,85],
             [[15,38,55],[40,98,159],[55,156,189],[62,175,96],
@@ -131,6 +142,9 @@ def decode(path:Path,run:datetime,lead:int,key:str):
                 raise ValueError('UH maximum interval metadata mismatch')
             if spec.timing=='instant' and str(props['stepType']) not in ('instant','instantaneous'):
                 raise ValueError('Unexpected GRIB step type for instantaneous field')
+            expected=EXPECTED_NATIVE[key]
+            if (str(props['typeOfLevel']),int(props['level']),str(props['units']))!=expected:
+                raise ValueError('Native GRIB type/level/units mismatch for '+key)
             if str(props['gridType'])!='lambert':
                 raise ValueError('Expected documented native CONUS HRRR Lambert grid')
             la=np.asarray(ec.codes_get_array(gid,'latitudes'),dtype=np.float64)
@@ -178,7 +192,15 @@ def generate(out:Path,run:datetime=RUN)->dict:
                 path.write_bytes(body)
                 lat,lon,values,grib=decode(path,run,lead,key)
                 mapped,geo=spatial_regrid(lat,lon,values,RANGES[key])
-                geo['ecCodesCoordinateCrosscheck']=spotcheck_output_against_eccodes(path,mapped)
+                coord=spotcheck_output_against_eccodes(path,mapped)
+                # The shared reference function was originally temperature-only.
+                # Record generic source-field values without claiming all units K.
+                geo['ecCodesCoordinateCrosscheck']={
+                  'checkedPixelCenters':coord['checked_output_pixel_centers'],
+                  'maxAbsoluteFieldDifferenceInGribUnits':coord['max_abs_temperature_residual_K'],
+                  'maximumEcCodesDistanceKm':coord['max_eccodes_distance_km'],
+                  'referenceMethod':'separate ecCodes nearest lookup using same NOAA GRIB source',
+                }
                 tag=f'{key}_f{lead:02d}'
                 fields[tag]={
                     'field':key,'runAt':run.isoformat().replace('+00:00','Z'),
@@ -190,6 +212,9 @@ def generate(out:Path,run:datetime=RUN)->dict:
                     'sourceURL':url,'sourceRecord':selection['record'],
                     'sourceSHA256':sha256(body).hexdigest(),'sourceBytes':len(body),
                     'gribMetadata':grib,'geographicQA':geo,
+                    'catalogUnits':FIELDS[key].units,
+                    'unitsInterpretation':('NOAA NCEP inventory units; ecCodes local parameter units unresolved'
+                          if key=='uh25_max' else 'ecCodes native GRIB units validated'),
                     'minValue':float(np.nanmin(mapped)),'maxValue':float(np.nanmax(mapped)),
                 }
                 if key=='uh25_max':
@@ -215,10 +240,6 @@ def generate(out:Path,run:datetime=RUN)->dict:
             item=fields[tag]
             png=tag+'.png';cog=tag+'.tif'
             rgba=paint(item.pop('array'),'uh25_max' if tag=='uh25_swath_3h' else item['field'])
-            from pipelines.hrrr_georeg import write_cog
-            # Recover mapped original data (RGBA has presentation thresholds).
-            # Keep array until COG is written.
-            # See data-array assignment below.
             item['png']=png
             Image.fromarray(rgba,'RGBA').save(out/png,optimize=True)
             item['pngSHA256']=sha256((out/png).read_bytes()).hexdigest()
