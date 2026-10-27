@@ -114,7 +114,8 @@ export default function App() {
     return ()=>controller.abort();
   },[selectedLive?.id,selectedLive?.manifest,liveReload]);
   const liveState=selectedLive?liveFreshness(selectedLive.validAt,now):'stale';
-  const liveDisplay=liveEnabled&&liveState==='fresh'&&liveCandidate!==null&&selectedLive!==null;
+  const liveDisplay=liveEnabled&&liveState==='fresh'&&liveCandidate!==null&&selectedLive!==null&&
+    liveCandidate.validAt===selectedLive.validAt&&liveCandidate.latestRunAt===selectedLive.runAt;
   const pilotImage=useMemo(()=>{
     if(liveDisplay && liveCandidate && selectedLive){
       return liveOverlay(liveCandidate,selectedLive.id,liveMode,import.meta.env.BASE_URL+LIVE_ROOT);
