@@ -1,0 +1,8 @@
+{
+  "schema": "stormchase-hrrr-observation-history/1",
+  "updatedAt": null,
+  "model": "HRRR",
+  "field": "TMP:2 m above ground",
+  "records": {},
+  "semantics": "Observation time of NOAA GRIB index availability, not source publication time or forecast validation"
+}
