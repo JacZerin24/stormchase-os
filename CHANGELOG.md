@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-27 — Severe convection and upper-air HRRR expansion
+
+- Verified **69/69 actual NODD HRRR wrfsfc GRIB field+level+forecast-interval identifiers** for one 17Z f02 cycle. Registry spans upper-level winds and height/temperature, surface/mixed/most-unstable CAPE/CIN, SRH and shear components, simulated convective morphology, hourly UH, updrafts/hail, moisture, and accumulation-aware precipitation. This is an inventory verification, not proof all were decoded.
+- Produced seven **real, historical** georeferenced images using eight NOAA GRIB2 message acquisitions from 17Z Oct 27: simulated composite reflectivity, hourly 2–5km UH, 17–20Z 2–5km UH maximum swath, 500-hPa height, 700-hPa temperature, SB CAPE and 0–1km SRH. Native run/valid/step and grid/units checks, sampled geographic QA, and source/image SHA checks included. UH GRIB units are unresolved by ecCodes local parameters; published NCEP unit interpretation is separately attributed.
+- Added an optional map-based archived convective field selector, fixed per-variable scales, temporal/provenance labels, weak-UH transparency warning, and explicit distinction between simulated reflectivity, hourly UH swaths and measured radar/storm tracks. Desktop/mobile Chromium QA passed; current-cycle public model publication remains **unimplemented**.
+- Added [full convection architecture and validation plan](docs/HRRR_CONVECTION_ROADMAP.md), including actual 250/300/500/700/850 charts with contours/vectors, effective-layer diagnostics, UH/reflectivity forecast object association, full vertical `wrfprs` soundings, multi-cycle trends, and observation/model verification.
+
 ## 2026-10-27 — Meteorological integration and provenance milestones
 
 - Merged official SPC categorical Day 1–3 map controls, enhanced NOAA/NWS source/valid time parsing, stale/error health states and bounded retries, with official HTTPS and desktop/mobile Chromium testing. Actual active-event NWS warning revisions/cancellations and human polygon geometry QA remain open.

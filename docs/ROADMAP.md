@@ -1,5 +1,13 @@
 # Feature Inventory and Roadmap
 
+## Convection Desk expansion — October 27, 2026
+
+The HRRR workstream is expanded from temperature-only research to a complete severe-convection field architecture (see [HRRR CONVECTION ROADMAP](HRRR_CONVECTION_ROADMAP.md)). Official NCEP/NODD actual `wrfsfc` index testing matched **69/69 configured field, level and time-window identities** on the audited 17Z f02 run. This includes REFC, hourly 2–5 and 0–2 km UH max/min, updraft, CAPE/CIN variants, storm-relative helicity, vertical shear components, 250/300/500/700/850/925 hPa data, precipitation windows and near-surface parameters.
+
+A separate *archived* real-data example now stages simulated composite reflectivity, hourly and contiguous 3-hour UH swaths, 500-hPa height, 700-hPa temperature, SB CAPE and 0–1 km SRH. All seven archived PNG layers passed local Chromium desktop/mobile interaction checks; latest generation/native-unit QA remains its separate feature-branch acceptance gate. **69 source index records are not 69 published forecast maps.**
+
+Next priority is not additional arbitrary model parameters; it is a source-time-aware, bounded near-current HRRR map production/asset cache, real upper-level charts (contours, wind vectors and moisture), UH swath/object evolution with scientifically distinct track labels, point soundings with complete vertical data, and independent reference verification. Do not promote these archived examples to operational current guidance.
+
 ## Implementation status verified October 27, 2026
 
 | Workstream | Evidence-backed state | Remaining blocker |

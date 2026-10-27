@@ -313,3 +313,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 @media (max-width: 600px) {
   .archive-map-banner { left: 12px; bottom: 105px; font-size: 9px; max-width: calc(100% - 24px); }
 }
+
+/* Data-grounded forecast scales, intentionally quiet and separate from SPC legend. */
+.convective-legend {margin:12px 0;display:grid;gap:6px}
+.legend-range-heading {font:600 10px var(--mono);letter-spacing:.4px;color:var(--muted)}
+.legend-color-ramp {height:11px;border:1px solid var(--line-strong);border-radius:2px}
+.legend-color-ticks {display:flex;justify-content:space-between;font:10px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
