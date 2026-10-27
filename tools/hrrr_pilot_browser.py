@@ -66,7 +66,9 @@ async def case(browser, mobile):
                 "banner":await page.locator(".archive-map-banner").inner_text()})
             await page.screenshot(path=str(OUT/f"{name}-{value}.png"),full_page=True)
         await panel.get_by_role("button",name="FOCUS PLAINS TEST DOMAIN").click()
-        await page.get_by_role("button",name="Switch to light mode").click()
+        # Initial display theme may follow system preference or storage;
+        # toggle the actual control independent of initial light/dark state.
+        await page.locator(".theme-button").click()
         await page.wait_for_timeout(1200)
         if not await page.locator(".archive-map-banner").is_visible():
             raise AssertionError("Archive overlay warning disappeared after basemap restyle")
