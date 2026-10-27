@@ -1,0 +1,29 @@
+name: HRRR severe convective source index QA
+on:
+  push:
+    branches: [feat/hrrr-convective-catalog-and-diagnostics]
+    paths: ['pipelines/hrrr_convective.py','pipelines/tests/test_hrrr_convective.py','.github/workflows/hrrr-convective-qa.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Strict scientific field and time-window unit tests
+        run: python -m unittest pipelines.tests.test_hrrr_convective -v
+      - name: Official NOAA full storm/upper-air inventory audit, existing archived model run
+        run: python -m pipelines.hrrr_convective --run 2026-10-27T17:00:00Z --lead 2 --out reports/hrrr-convective-index.json
+      - name: Preserve actual provider evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-convective-source-fields
+          path: reports/hrrr-convective-index.json
+          if-no-files-found: warn
+          retention-days: 14

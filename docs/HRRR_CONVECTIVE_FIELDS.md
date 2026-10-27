@@ -1,0 +1,18 @@
+# HRRR severe-convection field source catalog — research gate
+
+**Goal:** HRRR must support serious convective forecasting, not just 2m temperature. The catalog contains 69 distinct field identities grouped across simulated storms, instability, moisture, kinematics, surface, precipitation, and upper air. NOAA NCEP product reference: https://www.nco.ncep.noaa.gov/pmb/products/hrrr/hrrr.t00z.wrfsfcf02.grib2.shtml . Catalog references must be verified against the actual NOAA NODD `.idx` for each selected run/lead before any download; absent entries remain absent.
+
+**Availability is a state machine:** field defined ≠ index record present ≠ message bytes transferred ≠ ecCodes-decoded ≠ geographic QA passed ≠ independently reference validated ≠ publicly available. This PR covers only index verification, the beginning of this chain. `wrfprs` full-isobaric fields, native hybrid profiles, multi-model compatibility, 500-hPa vorticity derivation, 0–6-km true bulk shear, composite severe indices and full NWP atmospheric soundings require separate QA. HRRR CONUS `wrfsfc` does include useful 250/300/500/700/850/925 hPa subsets, but should not be mistaken for complete 3-D levels.
+
+**Core conventions:** simulated composite reflectivity REFC is instantaneous valid-time MODEL output, never radar observations. Hourly max UH (`MXUPHL`) at layer 5000–2000 m above ground is the MAXIMUM during the last hour (`lead-1 → lead`), not an instantaneous UH or a tornado probability. It does not provide individual storm tracks: if building a multi-hour *UH swath*, use a verified single model run and contiguous interval maxima; storm-object tracking needs another algorithm and independent verification. Dual APCP products may refer to accumulation since run vs last hour and MUST be disambiguated by exact source step descriptor. Model HLCY is tied to its own storm-motion method; VUCSH/VVCSH are gradients, not a directly decoded bulk-shear magnitude. DZDT is geometric vertical velocity (m/s), not omega (Pa/s).
+
+**Forecast UX next:** 500-hPa height/wind/temperature, 700-hPa humidity/vertical motion, 850-hPa thermal/wind, 250–300-hPa jets/divergence, CAPE/CIN and initiation, 0–1/0–3-km SRH and 0–6-km shear, REFC/1-km reflectivity, hourly 2–5-km UH and aggregated UH swaths, updraft/downdraft, hail, lightning, precip and time accumulation. Derived diagnostics need transparent methodology and verified physical units and masks.
+
+**Future cost gate:** a provider inventory is kilobytes, but each requested GRIB message can be MBs. Budget fields by priority, georegistration domain and caching, account for repeated run/valid combos, use no automatic entire-CONUS full-file downloads, and measure CPU/storage/egress. No live/operational status is asserted by this catalog.
+
+
+## Actual source validation — October 27, 2026
+
+[NOAA inventory check 40573079639](https://github.com/JacZerin24/stormchase-os/actions/runs/40573079639) **passed for all 69 configured fields**, using a genuine NOAA NODD HRRR 2026-10-27 17Z run valid at 19Z (forecast hour 2). The first strict match found 57 records; official-source diagnostics confirmed the 12 remaining interval fields used suffixes like `1-2 hour max fcst`, `1-2 hour min fcst`, and `0-2 hour acc fcst`. Once the parser was corrected to preserve these exact descriptors, the real upstream inventory matched 69/69. Six offline semantic unit tests also passed.
+
+This proves the source inventory has exactly corresponding field/level/time-interval records in that particular cycle. It **does not** prove that their GRIB bytes were fetched, decoded or rendered; that is a separate acceptance gate. Simulated composite reflectivity and UH swaths must never be identified as live radar or verified storm/tornado tracks.
