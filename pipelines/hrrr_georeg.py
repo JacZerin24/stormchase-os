@@ -11,13 +11,15 @@ import hashlib
 import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import eccodes as ec
+# rasterio bundles GDAL/native libraries; load it before ecCodes' bundled
+# GRIB C stack to avoid competing GDAL/libproj initializations.
 import numpy as np
-from PIL import Image
+from scipy.spatial import cKDTree
 from rasterio import open as rio_open
 from rasterio.shutil import copy as cog_copy
 from rasterio.transform import from_bounds
-from scipy.spatial import cKDTree
+from PIL import Image
+import eccodes as ec
 
 # Fixed QA pilot domain, not a chase-target recommendation.
 BOUNDS = (-103.0, 33.0, -94.0, 39.5)  # west, south, east, north
