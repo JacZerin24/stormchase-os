@@ -23,8 +23,23 @@ jobs:
       - name: Install pinned geometry and GRIB dependencies
         run: |
           python -m pip install 'eccodes==2.44.0' 'numpy==2.2.6' 'scipy==1.15.3' 'rasterio==1.4.3' 'Pillow==11.2.1'
+      - name: Diagnose native import compatibility
+        run: |
+          python -X faulthandler - <<'PY'
+          print("Import numpy", flush=True)
+          import numpy
+          print("Import scipy", flush=True)
+          import scipy.spatial
+          print("Import rasterio", flush=True)
+          import rasterio
+          print("Import pillow", flush=True)
+          from PIL import Image
+          print("Import eccodes", flush=True)
+          import eccodes
+          print("All native imports loaded", flush=True)
+          PY
       - name: Offline geospatial tests
-        run: python -m unittest discover -s pipelines/tests -v
+        run: python -X faulthandler -m unittest discover -s pipelines/tests -v
       - name: Retrieve genuine 12Z+6 HRRR TMP 2m
         run: python -m pipelines.hrrr_subset --run 2026-10-27T12:00:00Z --lead 6 --variable TMP --level '2 m above ground' --out /tmp/hrrr_12z_f06.grib2
       - name: Retrieve genuine 15Z+3 HRRR TMP 2m
