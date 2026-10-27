@@ -59,6 +59,9 @@ describe('NWS warnings',()=>{
 describe('time parsing and requests',()=>{
   it('normalizes known UTC and numeric ArcGIS millisecond timestamps',()=>{
     expect(parseSourceTime('20261027_1630')).toBe('2026-10-27T16:30:00.000Z');
+    expect(parseSourceTime('202610271630')).toBe('2026-10-27T16:30:00.000Z');
+    expect(parseSourceTime('1793119002000')).toBe(new Date(1793119002000).toISOString());
+    expect(parseSourceTime('202602301630')).toBeNull();
     expect(parseSourceTime('2026-10-27T16:30:00')).toBeNull();
     expect(parseSourceTime('2026-10-27T11:30:00-05:00')).toBe('2026-10-27T16:30:00.000Z');
     expect(parseSourceTime(Date.parse('2026-10-27T16:30:00Z'))).toBe('2026-10-27T16:30:00.000Z');
