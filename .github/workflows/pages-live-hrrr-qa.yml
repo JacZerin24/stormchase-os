@@ -1,7 +1,14 @@
 name: Public recent HRRR scientific asset delivery check
 on:
+  workflow_run:
+    workflows: ["HRRR regional forecast publisher (research beta)"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    # Independent best-effort stale/missing-asset check, even if the model job never ran.
+    - cron: '23 */3 * * *'
   push:
-    branches: [test/public-hrrr-assets-acceptance]
+    branches: [test/public-hrrr-assets-acceptance, fix/hrrr-phase1-monitoring-and-feed-health]
     paths:
       - 'tools/pages_live_hrrr_probe.py'
       - '.github/workflows/pages-live-hrrr-qa.yml'
@@ -10,6 +17,7 @@ permissions:
   contents: read
 jobs:
   production:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -27,3 +35,17 @@ jobs:
           path: reports/live-hrrr-public-qa.json
           if-no-files-found: warn
           retention-days: 14
+
+  publisher-failed:
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report missed or failed live model refresh
+        env:
+          PUBLISH_RESULT: ${{ github.event.workflow_run.conclusion }}
+          PUBLISH_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          echo "HRRR publisher did not successfully deploy: ${PUBLISH_RESULT}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Publisher run: ${PUBLISH_URL}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Older published assets may remain, but must not be labeled fresh after expiry." >> "${GITHUB_STEP_SUMMARY}"
+          exit 1
