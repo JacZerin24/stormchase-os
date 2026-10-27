@@ -77,6 +77,8 @@ export default function App() {
   const [liveCatalog,setLiveCatalog]=useState<LiveCatalog|null>(null);
   const [liveCandidate,setLiveCandidate]=useState<LiveCandidate|null>(null);
   const [liveLoadError,setLiveLoadError]=useState<string|null>(null);
+  const [liveCatalogError,setLiveCatalogError]=useState<string|null>(null);
+  const [liveCatalogLastSuccess,setLiveCatalogLastSuccess]=useState<string|null>(null);
   const [liveEnabled,setLiveEnabled]=useState(false);
   const [liveMode,setLiveMode]=useState<LiveMode>('newer');
   const [liveSnapshotId,setLiveSnapshotId]=useState('');
@@ -89,9 +91,9 @@ export default function App() {
           {signal:controller.signal,cache:'no-store'});
         if(!res.ok)throw new Error('Publisher has no available current-model package (HTTP '+res.status+')');
         const parsed=parseLiveCatalog(await res.json() as unknown);
-        if(!controller.signal.aborted){setLiveCatalog(parsed);setLiveLoadError(null);}
+        if(!controller.signal.aborted){setLiveCatalog(parsed);setLiveCatalogError(null);setLiveCatalogLastSuccess(new Date().toISOString());}
       }catch(err){
-        if(!controller.signal.aborted)setLiveLoadError(err instanceof Error?err.message:'Model catalog unavailable');
+        if(!controller.signal.aborted)setLiveCatalogError(err instanceof Error?err.message:'Model catalog unavailable');
       }
     }
     void getCatalog();
@@ -115,6 +117,7 @@ export default function App() {
   },[selectedLive?.id,selectedLive?.manifest,liveReload]);
   const liveState=selectedLive?liveFreshness(selectedLive.validAt,now):'stale';
   const liveDisplay=liveEnabled&&liveState==='fresh'&&liveCandidate!==null&&selectedLive!==null&&
+    !liveCatalogError&&!liveLoadError&&
     liveCandidate.validAt===selectedLive.validAt&&liveCandidate.latestRunAt===selectedLive.runAt;
   const pilotImage=useMemo(()=>{
     if(liveDisplay && liveCandidate && selectedLive){
@@ -162,13 +165,14 @@ export default function App() {
           </div>
           <p className="caveat">Authentic NOAA HRRR model forecast, not observed temperature, a verified chase target, or an official warning service. Hourly publication is best effort.</p>
           {selectedLive&&liveCandidate ? <>
-            <span className={liveState==='fresh'?'feed-status good':'feed-status bad'}>
-              <span className="status-dot"/>{liveState==='fresh'?'RECENT FORECAST · SCIENTIFIC QC':'STALE / INVALID VALID TIME · HIDDEN'}
+            <span className={liveState==='fresh'&&!liveCatalogError&&!liveLoadError?'feed-status good':'feed-status bad'}>
+              <span className="status-dot"/>{liveCatalogError||liveLoadError?'SOURCE/CATALOG ERROR · MAP HIDDEN':liveState==='fresh'?'RECENT FORECAST · SCIENTIFIC QC':'STALE / INVALID VALID TIME · HIDDEN'}
             </span>
             <dl className="meta">
               <div><dt>Forecast valid time</dt><dd>{utc(selectedLive.validAt)}</dd></div>
               <div><dt>Newest run initialized</dt><dd>{utc(liveCandidate.latestRunAt)}</dd></div>
               <div><dt>Index observed at</dt><dd>{utc(liveCandidate.sourceIndexObservedAt)}</dd></div>
+              <div><dt>Catalog last retrieved</dt><dd>{utc(liveCatalogLastSuccess)}</dd></div>
               <div><dt>Products processed</dt><dd>{utc(liveCandidate.generatedAt)}</dd></div>
               <div><dt>Region</dt><dd>Southern Plains pilot · ~0.04° pixels</dd></div>
             </dl>
@@ -192,6 +196,8 @@ export default function App() {
             <button type="button" className="model-focus" onClick={()=>{setLiveEnabled(true);setPilotEnabled(false);setConvectiveEnabled(false);setPilotFocusRevision(i=>i+1)}}>FOCUS VALIDATED MODEL DOMAIN</button>
             <p className="caveat">Source, run, GRIB fields and geographic registration checked. Forecast accuracy, native bitmap treatment and original release latency are not independently verified.</p>
           </> : <p className="warning">{liveLoadError??'Checking the most recent published HRRR cycle...'}</p>}
+          {liveCatalogError&&<p className="warning" role="alert">Latest HRRR catalog refresh failed: {liveCatalogError}. The forecast overlay is hidden until the source can be checked successfully. This is not evidence of benign weather.</p>}
+          {liveLoadError&&selectedLive&&<p className="warning" role="alert">HRRR model asset verification failed: {liveLoadError}. The forecast overlay is hidden.</p>}
           {liveState!=='fresh'&&selectedLive&&<p className="warning">Published forecast is outdated or outside the supported model-valid window; map is hidden.</p>}
           <button type="button" className="model-focus" onClick={()=>setLiveReload(n=>n+1)}>CHECK FOR NEW MODEL CYCLE</button>
         </article>

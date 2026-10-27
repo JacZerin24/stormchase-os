@@ -53,7 +53,26 @@ async def run_one(browser,mobile):
         images=[url for url,status in responses if status==200 and url.endswith(".png")]
         if not images:
             raise AssertionError("MapLibre made no successful model image source request")
-        return {"viewport":mode,"forecast":banner,"modelImageRequests":len(images)}
+        # A fresh, previously displayed model must not remain presented as
+        # currently verified when the catalog endpoint becomes unreachable.
+        route_pattern="**/live/hrrr/latest.json"
+        async def block_catalog(route):
+            await route.abort()
+        await page.route(route_pattern,block_catalog)
+        await panel.get_by_role("button",name="CHECK FOR NEW MODEL CYCLE").click()
+        await panel.get_by_role("alert").wait_for(timeout=15000)
+        error_text=await panel.get_by_role("alert").inner_text()
+        if "catalog refresh failed" not in error_text.lower():
+            raise AssertionError("Catalog failure not explained to the user")
+        if await page.locator(".archive-map-banner").is_visible():
+            raise AssertionError("Stale model overlay remains visible during source outage")
+        await page.unroute(route_pattern,block_catalog)
+        await panel.get_by_role("button",name="CHECK FOR NEW MODEL CYCLE").click()
+        await page.locator(".archive-map-banner").wait_for(state="visible",timeout=15000)
+        if await panel.get_by_role("alert").count():
+            raise AssertionError("Catalog recovery did not clear source outage")
+        return {"viewport":mode,"forecast":banner,"modelImageRequests":len(images),
+                "catalogOutageFailsClosed":True,"catalogRecovery":True}
     finally:
         await page.close()
 
