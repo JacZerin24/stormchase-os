@@ -4,7 +4,7 @@ on:
     - cron: '48 * * * *'
   workflow_dispatch:
   push:
-    branches: [feat/hrrr-live-controlled-publisher]
+    branches: [main, feat/hrrr-live-controlled-publisher]
     paths:
       - 'pipelines/hrrr_live_pack.py'
       - 'pipelines/hrrr_pages_cache.py'
