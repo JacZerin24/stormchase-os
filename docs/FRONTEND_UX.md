@@ -1,6 +1,6 @@
 # Frontend Interaction Design — v0.1 review branch
 
-Status: **proposed in a stacked PR**; automated browser behavior is not yet verified.
+Status: frontend foundation merged; manual browser behavior and live-data verification remain separate release checks.
 
 ## Interface priorities
 
@@ -23,3 +23,14 @@ Status: **proposed in a stacked PR**; automated browser behavior is not yet veri
 - [ ] Inspect browser console for MapLibre errors and perform Lighthouse/axe accessibility audit.
 
 Automated unit tests cover static region extent constraints, **not** end-to-end interaction or official feed availability. The complete v0.1 release gates remain tracked by docs/ROADMAP.md and issue #2.
+
+## Visual system — dual-theme revision (2026-10-27)
+
+- **Design direction:** meteorological field workstation, not a conversational dashboard. Narrow display typography (Barlow Condensed), readable IBM Plex Sans, and tabular IBM Plex Mono; system-font fallbacks when Google Fonts is unavailable.
+- **Dark:** graphite / blackened-steel backgrounds, copper focus accents, restrained muted neutral metadata; **Light:** warm-paper surfaces, charcoal text, oxidized-copper accents. SPC categorical risk colors and NWS warning classifications remain semantically consistent across both.
+- Theme toggle sits in the map toolbar on desktop and mobile; explicit choice persists in localStorage where permitted, otherwise changes remain usable during the session. First visit respects OS appearance preference; color-scheme and theme-color are kept consistent.
+- MapLibre switches between CARTO dark-matter and CARTO positron styles; both styles require network access and provider permission. Overlay sources and paint settings are restored after every style load. Camera position and user-selected extent should not jump solely from switching appearance.
+- [ ] Manual QA: repeatedly toggle modes with SPC/warnings visible, hide one layer, change opacity, pan/zoom and confirm layers and camera are preserved.
+- [ ] Manual QA: mobile theme button fits at 320px and larger, collapsed sheet remains usable, map attribution remains visible.
+- [ ] Manual QA: contrast audit WCAG 2.2 AA on buttons, small timestamps, focus rings, and cartographic controls for both modes.
+- [ ] Manual QA: reload after selecting each theme; test missing localStorage and blocked fonts, and OS appearance on first visit.
