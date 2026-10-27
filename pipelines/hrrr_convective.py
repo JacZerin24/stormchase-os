@@ -42,10 +42,10 @@ def descriptor(field:Field,lead:int)->str:
     if type(lead) is not int or lead<1 or lead>48:raise ValueError('Lead must be 1..48')
     kind=field.timing
     if kind=='instant':return f'{lead} hour fcst'
-    if kind=='hourly_max':return f'{lead-1}-{lead} hour max'
-    if kind=='hourly_min':return f'{lead-1}-{lead} hour min'
-    if kind=='hourly_accum':return f'{lead-1}-{lead} hour acc'
-    if kind=='since_run_accum':return f'0-{lead} hour acc'
+    if kind=='hourly_max':return f'{lead-1}-{lead} hour max fcst'
+    if kind=='hourly_min':return f'{lead-1}-{lead} hour min fcst'
+    if kind=='hourly_accum':return f'{lead-1}-{lead} hour acc fcst'
+    if kind=='since_run_accum':return f'0-{lead} hour acc fcst'
     raise ValueError('Unknown statistic')
 
 def select(entries:list[Entry],field:Field,lead:int)->dict:
