@@ -5,9 +5,10 @@ export interface FeedState<T> {
   data: T | null;
   state: 'loading' | 'ready' | 'error';
   lastSuccess: string | null;
+  lastAttempt: string | null;
   error: string | null;
 }
-const initial = <T,>(): FeedState<T> => ({data:null,state:'loading',lastSuccess:null,error:null});
+const initial = <T,>(): FeedState<T> => ({data:null,state:'loading',lastSuccess:null,lastAttempt:null,error:null});
 
 export function useWeather() {
   const [outlook, setOutlook] = useState<FeedState<OutlookData>>(initial);
@@ -17,13 +18,16 @@ export function useWeather() {
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;
+    const attempted = new Date().toISOString();
+    setOutlook(prev=>({...prev,lastAttempt:attempted}));
+    setAlerts(prev=>({...prev,lastAttempt:attempted}));
     void fetchOutlook(request.signal).then(data => {
-      if (!request.signal.aborted) setOutlook({data,state:'ready',lastSuccess:new Date().toISOString(),error:null});
+      if (!request.signal.aborted) setOutlook(prev=>({...prev,data,state:'ready',lastSuccess:new Date().toISOString(),error:null}));
     }).catch((error: unknown) => {
       if (!request.signal.aborted) setOutlook(prev => ({...prev,state:'error',error:error instanceof Error ? error.message:'Unknown fetch error'}));
     });
     void fetchAlerts(request.signal).then(data => {
-      if (!request.signal.aborted) setAlerts({data,state:'ready',lastSuccess:new Date().toISOString(),error:null});
+      if (!request.signal.aborted) setAlerts(prev=>({...prev,data,state:'ready',lastSuccess:new Date().toISOString(),error:null}));
     }).catch((error: unknown) => {
       if (!request.signal.aborted) setAlerts(prev => ({...prev,state:'error',error:error instanceof Error ? error.message:'Unknown fetch error'}));
     });
