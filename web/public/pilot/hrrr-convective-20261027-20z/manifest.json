@@ -52,12 +52,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "m2/s2",
+      "unitsInterpretation": "NOAA NCEP inventory units; ecCodes local parameter units unresolved",
       "minValue": 0.0,
       "maxValue": 0.20000000298023224
     },
@@ -97,12 +99,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "m2/s2",
+      "unitsInterpretation": "NOAA NCEP inventory units; ecCodes local parameter units unresolved",
       "minValue": 0.0,
       "maxValue": 0.0
     },
@@ -142,12 +146,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "m2/s2",
+      "unitsInterpretation": "NOAA NCEP inventory units; ecCodes local parameter units unresolved",
       "minValue": 0.0,
       "maxValue": 0.0,
       "png": "uh25_max_f03.png",
@@ -189,12 +195,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "dBZ",
+      "unitsInterpretation": "ecCodes native GRIB units validated",
       "minValue": -10.0,
       "maxValue": 37.1875,
       "png": "refc_f03.png",
@@ -236,12 +244,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "gpm",
+      "unitsInterpretation": "ecCodes native GRIB units validated",
       "minValue": 5752.00048828125,
       "maxValue": 5836.59423828125,
       "png": "hgt500_f03.png",
@@ -283,12 +293,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "K",
+      "unitsInterpretation": "ecCodes native GRIB units validated",
       "minValue": 273.951171875,
       "maxValue": 280.763671875,
       "png": "t700_f03.png",
@@ -330,12 +342,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 0.0,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 0.0,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "J/kg",
+      "unitsInterpretation": "ecCodes native GRIB units validated",
       "minValue": 0.0,
       "maxValue": 2290.0,
       "png": "cape_sb_f03.png",
@@ -377,12 +391,14 @@
         "missingPixels": 0,
         "sampling": "nearest native grid point, NOT newly resolved meteorological detail",
         "ecCodesCoordinateCrosscheck": {
-          "checked_output_pixel_centers": 16,
-          "max_abs_temperature_residual_K": 7.629394573882564e-07,
-          "max_eccodes_distance_km": 1.9638150220528332,
-          "method": "direct ecCodes nearest query at registered output pixel centers"
+          "checkedPixelCenters": 16,
+          "maxAbsoluteFieldDifferenceInGribUnits": 7.629394573882564e-07,
+          "maximumEcCodesDistanceKm": 1.9638150220528332,
+          "referenceMethod": "separate ecCodes nearest lookup using same NOAA GRIB source"
         }
       },
+      "catalogUnits": "m2/s2",
+      "unitsInterpretation": "ecCodes native GRIB units validated",
       "minValue": -15.300000190734863,
       "maxValue": 171.8000030517578,
       "png": "srh01_f03.png",
