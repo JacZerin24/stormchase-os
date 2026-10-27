@@ -1,0 +1,47 @@
+name: Historical HRRR map browser QA
+on:
+  push:
+    branches: [feat/hrrr-georeferenced-pilot]
+    paths:
+      - 'web/public/pilot/**'
+      - 'web/src/**'
+      - 'tools/hrrr_pilot_browser.py'
+      - '.github/workflows/hrrr-pilot-browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked frontend
+        working-directory: web
+        run: npm ci --no-audit --no-fund
+      - name: Chromium test installation
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+      - name: Browser check with real bundled archived GRIB-derived products
+        run: |
+          cd web
+          npm run dev -- --host 127.0.0.1 --port 4173 >../vite-archive.log 2>&1 &
+          cd ..
+          python tools/hrrr_pilot_browser.py
+      - name: Save browser evidence even when QA fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-archive-browser
+          path: |
+            browser-artifacts/
+            vite-archive.log
+          if-no-files-found: warn
+          retention-days: 14

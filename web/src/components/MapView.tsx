@@ -3,6 +3,7 @@ import maplibregl, { type Map as MapInstance, type GeoJSONSource } from 'maplibr
 import { emptyCollection, SPC_CATEGORIES, type AreaCollection } from '../data/weather';
 import { REGION_BOUNDS, type RegionKey } from '../data/regions';
 import { basemapStyle, type DisplayTheme } from '../theme';
+import type {PilotOverlay} from '../data/hrrrPilot';
 
 type Props = {
   outlook: AreaCollection | null;
@@ -13,11 +14,13 @@ type Props = {
   focus: { region: RegionKey; revision: number };
   outlookOpacity: number;
   theme: DisplayTheme;
+  pilotImage: PilotOverlay | null;
+  pilotFocusRevision: number;
 };
 const categoryColor = ['match',['get','dn'],2,'#c1e9c1',3,'#66a366',4,'#ffe066',5,'#ffa366',6,'#e06666',8,'#ee99ee','#96a8b8'] as any;
 const warningColor = ['match',['get','event'],'Tornado Warning','#fb4b69','Severe Thunderstorm Warning','#ffb04d','#cedbe2'] as any;
 
-export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoordinates,focus,outlookOpacity,theme}:Props) {
+export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoordinates,focus,outlookOpacity,theme,pilotImage,pilotFocusRevision}:Props) {
   const element = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapInstance | null>(null);
   const [styleEpoch,setStyleEpoch] = useState(0);
@@ -65,6 +68,28 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
     const m=mapRef.current;
     if (styleEpoch && m) (m.getSource('nws-warnings') as GeoJSONSource | undefined)?.setData(warnings??emptyCollection());
   },[styleEpoch,warnings]);
+  useEffect(()=>{
+    const map=mapRef.current;
+    if(!styleEpoch||!map)return;
+    // Remove old raster first. A theme change destroys style sources, so
+    // re-add on every style epoch. Keep SPC/NWS vector data ABOVE this image.
+    if(map.getLayer('hrrr-archived-image'))map.removeLayer('hrrr-archived-image');
+    if(map.getSource('hrrr-archived-source'))map.removeSource('hrrr-archived-source');
+    if(!pilotImage)return;
+    const [west,south,east,north]=pilotImage.bounds;
+    map.addSource('hrrr-archived-source',{type:'image',url:pilotImage.url,
+      coordinates:[[west,north],[east,north],[east,south],[west,south]]});
+    map.addLayer({id:'hrrr-archived-image',type:'raster',source:'hrrr-archived-source',
+      paint:{'raster-opacity':0.82,'raster-fade-duration':0}},
+      map.getLayer('spc-fill')?'spc-fill':undefined);
+  },[styleEpoch,pilotImage?.url,pilotImage?.bounds,pilotImage]);
+  useEffect(()=>{
+    const map=mapRef.current;
+    if(!pilotFocusRevision||!pilotImage||!styleEpoch||!map)return;
+    const [west,south,east,north]=pilotImage.bounds;
+    map.fitBounds([[west,south],[east,north]],{padding:32,maxZoom:8,
+      duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:450});
+  },[pilotFocusRevision,styleEpoch,pilotImage?.bounds]);
   useEffect(()=>{
     const m=mapRef.current;
     if (!styleEpoch||!m) return;

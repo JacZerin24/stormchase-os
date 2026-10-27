@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import {HRRR_PILOT_PATH,parsePilotManifest,pilotOverlay,type PilotManifest,type PilotMode} from './data/hrrrPilot';
 import MapView from './components/MapView';
 import {activeWarningGeometry,NWS_INFO,SPC_CATEGORIES,SPC_INFO} from './data/weather';
 import {outlookHealth,warningHealth,type WeatherHealth} from './data/freshness';
@@ -38,6 +39,26 @@ export default function App() {
   const spcHealth=outlookHealth(outlook,now);
   const nwsHealth=warningHealth(alerts,now);
   const currentWarnings=activeWarningGeometry(alerts.data,now);
+  const [pilotManifest,setPilotManifest] = useState<PilotManifest | null>(null);
+  const [pilotLoadError,setPilotLoadError] = useState<string | null>(null);
+  const [pilotMode,setPilotMode] = useState<PilotMode>('earlier');
+  const [pilotEnabled,setPilotEnabled] = useState(false);
+  const [pilotFocusRevision,setPilotFocusRevision] = useState(0);
+  useEffect(()=>{
+    const abort=new AbortController();
+    const manifestUrl=import.meta.env.BASE_URL+HRRR_PILOT_PATH+'manifest.json';
+    void fetch(manifestUrl,{signal:abort.signal,cache:'no-cache'}).then(async r=>{
+      if(!r.ok)throw new Error('Archived model assets not published (HTTP '+r.status+')');
+      const parsed=parsePilotManifest(await r.json() as unknown);
+      if(!abort.signal.aborted)setPilotManifest(parsed);
+    }).catch((error:unknown)=>{
+      if(!abort.signal.aborted)setPilotLoadError(error instanceof Error?error.message:'Unknown asset problem');
+    });
+    return ()=>abort.abort();
+  },[]);
+  const pilotImage=useMemo(()=>pilotEnabled && pilotManifest ?
+    pilotOverlay(pilotManifest,pilotMode,import.meta.env.BASE_URL+HRRR_PILOT_PATH) : null,
+    [pilotEnabled,pilotManifest,pilotMode]);
   return <div className="shell">
     <aside className="rail" aria-hidden="true"><div className="rail-mark">SC<span>·</span></div><div className="rail-line"/><div className="rail-icon">⌖</div><div className="rail-version">V0.1</div></aside>
     <section className={`sidebar ${sheetOpen ? 'is-open' : ''}`} aria-label="Weather data layers">
@@ -67,6 +88,25 @@ export default function App() {
         </article>
         <div className="section-index legend-heading"><span>02 / CATEGORICAL KEY</span><span>SPC</span></div>
         <div className="legend">{Object.entries(SPC_CATEGORIES).map(([id,entry])=><div className="legend-entry" key={id}><span className="swatch" style={{backgroundColor:entry.color}}/><b>{entry.abbreviation}</b><small>{entry.label}</small></div>)}</div>
+        <div className="section-index legend-heading"><span>03 / ARCHIVED MODEL LAB</span><span>HRRR</span></div>
+        <article className="layer-card model-archive-panel">
+          <div className="layer-head"><span className="layer-icon cyan">◈</span><div className="layer-name"><strong>HRRR model cycle test</strong><small>ARCHIVED 27 OCT 2026 · NOT LIVE</small></div><Toggle label="Show archived HRRR pilot overlay" enabled={pilotEnabled} onChange={setPilotEnabled}/></div>
+          <p className="caveat">Historical, real-data test. The images do not update and must never be interpreted as a current forecast.</p>
+          {pilotManifest ? <>
+            <dl className="meta">
+              <div><dt>Common valid time</dt><dd>{utc(pilotManifest.validAt)}</dd></div>
+              <div><dt>Spatial method</dt><dd>Nearest gridpoint · 5 km cap</dd></div>
+              <div><dt>Displayed field</dt><dd>2-m temperature · °F</dd></div>
+            </dl>
+            <div className="region-control"><label htmlFor="model-cycle">SAME VALID TIME / DIFFERENT CYCLES</label><select id="model-cycle" value={pilotMode} onChange={event=>setPilotMode(event.currentTarget.value as PilotMode)}>
+              <option value="earlier">12Z initialization · +6 h</option>
+              <option value="later">15Z initialization · +3 h</option>
+              <option value="difference">15Z − 12Z · temperature change</option>
+            </select><p>{pilotMode==='difference'?'Color scale: °F difference between forecast cycles; not observed change.':'Temperature colors use identical fixed °F thresholds across both cycles.'}</p></div>
+            <button type="button" className="model-focus" onClick={()=>{setPilotEnabled(true);setPilotFocusRevision(i=>i+1);}}>FOCUS PLAINS TEST DOMAIN</button>
+            <p className="caveat">QA caveat: geometric regridding and GRIB identity checked; independent numerical forecast skill and map alignment signoff remain outstanding.</p>
+          </> : <p className="warning">{pilotLoadError??'Checking archived HRRR test assets...'}</p>}
+        </article>
         <p className="disclaimer">Source: NOAA/NWS. Product issue/validity times and browser retrieval times are separate. This experimental website is not an official alert service or a safe-route guarantee.</p>
       </div>
       <footer className="side-footer"><button type="button" onClick={refresh}>↻ &nbsp; REFRESH WEATHER DATA</button><div><span>5 MIN AUTOMATIC REFRESH</span><span>UTC {new Date(now).toISOString().slice(11,16)}</span></div></footer>
@@ -76,9 +116,11 @@ export default function App() {
         focus={focus} outlookOpacity={outlookOpacity/100} theme={theme}
         showOutlook={showOutlook&&spcHealth.render}
         showWarnings={showWarnings&&nwsHealth.render}
+        pilotImage={pilotImage} pilotFocusRevision={pilotFocusRevision}
         onCoordinates={setCoords}/>
       <div className="map-header"><div className="map-title"><span className="map-title-mark">⌖</span><div><small>FORECAST DESK / 01</small><strong>Severe Weather Analysis</strong></div></div><div className="map-header-actions"><button type="button" className="theme-button" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} onClick={() => setTheme(previous => previous === 'dark' ? 'light' : 'dark')}><span className="theme-glyph" aria-hidden="true">{theme === 'dark' ? '☼' : '◕'}</span><span>{theme === 'dark' ? 'LIGHT' : 'DARK'} MODE</span></button><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET VIEW</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
       <div className="map-label"><span className="map-label-rule" aria-hidden="true" />CONTIGUOUS UNITED STATES <span>/ LATEST RETRIEVED PRODUCTS</span></div>
+      {pilotImage&&<div className="archive-map-banner" role="status">ARCHIVED HRRR TEST CASE · VALID 2026-10-27 18Z · NOT CURRENT <span>{pilotMode==='difference'?'15Z − 12Z FORECAST CHANGE':'MODEL INIT '+(pilotMode==='earlier'?'12Z':'15Z')}</span></div>}
       <div className="map-footer"><span>{coords}</span><span className={spcHealth.render && nwsHealth.render ? 'feeds-ok' : 'feeds-degraded'}><i/> {spcHealth.render && nwsHealth.render ? 'FEEDS RETRIEVED · LATENCY POSSIBLE' : 'CHECK SOURCE STATUS · NOT ALERT DELIVERY'}</span></div>
     </main>
   </div>;
