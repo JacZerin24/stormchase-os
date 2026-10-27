@@ -56,11 +56,25 @@ export function parseSourceTime(value: unknown): string | null {
   }
   if (typeof value !== 'string' || !value.trim()) return null;
   const s = value.trim();
-  const compact = /^(\d{4})(\d{2})(\d{2})[_ ](\d{2})(\d{2})$/.exec(s);
+  // Real SPC GIS feed observed 2026-10-27: issue/valid/expire are 12-digit
+  // YYYYMMDDHHmm strings; GIS ingest times are epoch-millisecond strings.
+  // Never confuse either with browser retrieval time.
+  if (/^\d{13}$/.test(s)) {
+    const ms = Number(s);
+    const d = new Date(ms);
+    return Number.isNaN(d.getTime()) ? null : d.toISOString();
+  }
+  const compact = /^(\d{4})(\d{2})(\d{2})[_ ]?(\d{2})(\d{2})(\d{2})?$/.exec(s);
   const utcText = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}(?::\d{2})?)$/.exec(s);
-  const canonical = compact ? compact[1]+'-'+compact[2]+'-'+compact[3]+'T'+compact[4]+':'+compact[5]+':00Z'
-    : utcText ? utcText[1]+'T'+utcText[2]+'Z'
-    : s;
+  if (compact) {
+    const year=Number(compact[1]),month=Number(compact[2]),day=Number(compact[3]);
+    const hour=Number(compact[4]),minute=Number(compact[5]),second=Number(compact[6]??'0');
+    const d = new Date(Date.UTC(year,month-1,day,hour,minute,second));
+    if (d.getUTCFullYear()!==year || d.getUTCMonth()+1!==month || d.getUTCDate()!==day ||
+        d.getUTCHours()!==hour || d.getUTCMinutes()!==minute || d.getUTCSeconds()!==second) return null;
+    return d.toISOString();
+  }
+  const canonical = utcText ? utcText[1]+'T'+utcText[2]+'Z' : s;
   if (!/(Z|[+-]\d{2}:\d{2})$/i.test(canonical)) return null;
   const d = new Date(canonical);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
