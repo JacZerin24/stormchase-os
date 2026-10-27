@@ -39,6 +39,7 @@ The locked Vite development server prints the local address. A web browser with 
 - [Development and deployment guide](docs/DEVELOPMENT.md)
 - [Changelog](CHANGELOG.md)
 - [Recent-model staging and cost measurements](docs/HRRR_RECENT_STAGING.md)
+- [Phase 1: Best-effort recent HRRR publishing, retention, provenance and reliability](docs/HRRR_LIVE_PUBLISHING.md)
 - [Hourly HRRR availability monitor](docs/HRRR_INVENTORY_MONITOR.md)
 - [Bounded observed-availability history](docs/HRRR_AVAILABILITY_HISTORY.md)
 - [Georeferenced historical HRRR research case](docs/HRRR_GEOREFERENCING_PILOT.md)
