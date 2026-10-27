@@ -8,6 +8,7 @@ on:
     paths:
       - 'pipelines/hrrr_live_pack.py'
       - 'pipelines/hrrr_pages_cache.py'
+      - 'pipelines/grib_inspect.py'
       - 'pipelines/tests/test_hrrr_live_pack.py'
       - 'pipelines/tests/test_hrrr_pages_cache.py'
       - '.github/workflows/hrrr-live-publish.yml'
