@@ -14,3 +14,9 @@ The first NOAA NOMADS workflow returned HTTP 200 and real RAP .idx data but expo
 A provider-specific parser now accepts dotted submessage identifiers, non-decreasing rather than strictly increasing offsets, exact source cycle and forecast-step identity, an exactly matched 2-m TMP field, and an upper byte bound found at the next strictly larger message offset. It marks hasSharedGribMessage if other indexed variables occupy the same byte range. Such a range is a *containing GRIB message*, not proof of a standalone meteorological field; decoding may require extracting a GRIB2 submessage. No RAP GRIB values or geographic field mapping are claimed verified.
 
 Source evidence: https://github.com/JacZerin24/stormchase-os/actions/runs/40568189784. Further tests must validate the latest provider response and whether 2-m TMP is a standalone or submessage field.
+
+## Verified RAP NOMADS metadata result — 2026-10-27 19:25:23 UTC
+
+Following provider-specific support for dotted GRIB submessages, the official live survey succeeded (GitHub Actions run https://github.com/JacZerin24/stormchase-os/actions/runs/40568941440). The source path was RAP 2026-10-27 17Z, forecast hour f02, valid 19Z; the awp130bgrb index had 1,015 records. The precise TMP/2-m AGL record was #928 at byte 37,301,683 through 37,371,405 inclusive (69,723 bytes) with no shared byte offset for this selected field. NOMADS returned HTTP 200 and a Last-Modified header of 17:47:44Z; this is provider object metadata, NOT a verified original publication time.
+
+Seven synthetic RAP inventory tests passed. **No RAP GRIB bytes were requested or decoded, no native grid was inspected, and no RAP map or HRRR/RAP numerical comparison was produced.** Those remain explicit next scientific gates.
