@@ -6,12 +6,12 @@ HRRR. Exact NOMADS current data paths verified by public directory listing.
 from __future__ import annotations
 import argparse
 import json
+import re
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
 from urllib.error import HTTPError,URLError
 from urllib.request import Request,urlopen
 
-from pipelines.hrrr_subset import parse_idx,choose
 from pipelines.hrrr_inventory import iso,validation_time
 
 BASE="https://nomads.ncep.noaa.gov/pub/data/nccf/com/rap/prod"
@@ -43,6 +43,48 @@ def diagnosis(text:str)->dict:
     return {"reason":"index serial/cycle/uniqueness rules differ from HRRR"}
 
 
+def parse_rap_index(body:str,run:datetime,lead:int)->tuple[int,int,int,bool,str]:
+    """RAP/NOMADS wgrib2 may use 15.1/15.2 submessages and repeated offsets.
+
+    Return exact message byte range plus whether other inventory fields share
+    the containing GRIB message. Do NOT infer distinct isolated field payload.
+    """
+    lines=[line for line in body.splitlines() if line.strip()]
+    if not lines or len(lines)>5000:
+        raise ValueError("Empty or unbounded RAP index")
+    records=[]
+    previous=-1
+    for line in lines:
+        p=line.split(":")
+        if len(p)<6 or not re.fullmatch(r"\d+(?:\.\d+)?",p[0]) or not p[1].isdigit() or not p[2].startswith("d="):
+            raise ValueError("RAP inventory record syntax invalid")
+        offset=int(p[1])
+        if offset<previous:
+            raise ValueError("RAP offsets decrease between messages")
+        if p[2][2:]!=run.strftime("%Y%m%d%H"):
+            raise ValueError("RAP inventory cycle mismatch")
+        previous=offset
+        records.append({"number":p[0],"offset":offset,"var":p[3],
+                        "level":p[4],"step":p[5],"raw":line})
+    if records[0]["offset"]!=0:
+        raise ValueError("RAP inventory does not start at byte zero")
+    matches=[x for x in records if x["var"]=="TMP" and x["level"]=="2 m above ground"]
+    if len(matches)!=1:
+        raise ValueError(f"Expected one RAP TMP2m field, got {len(matches)}")
+    item=matches[0]
+    if item["step"]!=f"{lead} hour fcst":
+        raise ValueError("RAP source forecast-step mismatch")
+    succeeding=next((x["offset"] for x in records if x["offset"]>item["offset"]),None)
+    if succeeding is None:
+        raise ValueError("Cannot bound last RAP inventory GRIB message")
+    begin=item["offset"]
+    end=succeeding-1
+    if not 0<end-begin+1<=64*1024*1024:
+        raise ValueError("RAP indexed message exceeds cap")
+    shared=sum(x["offset"]==begin for x in records)>1
+    return begin,end,len(records),shared,item["number"]
+
+
 def probe(run:datetime,lead:int=2)->dict:
     url=source_url(run,lead)
     try:
@@ -65,12 +107,7 @@ def probe(run:datetime,lead:int=2)->dict:
         return {"state":"invalid_inventory","runAt":iso(run),"leadHours":lead,
                 "url":url,"httpStatus":status,"error":"Non-200 or index >128KB"}
     try:
-        entries=parse_idx(data.decode("utf8"),run)
-        found,end=choose(entries,"TMP","2 m above ground")
-        if found.descriptor!=f"{lead} hour fcst" or end is None:
-            raise ValueError("Unsupported RAP TMP step or open-ended range")
-        if not 0<end-found.offset+1<64*1024*1024:
-            raise ValueError("Invalid RAP message size")
+        start,end,rows,shared,record_id=parse_rap_index(data.decode("utf8"),run,lead)
     except (ValueError,UnicodeDecodeError) as e:
         # HTTP 200 sometimes transports provider error HTML or a different
         # index dialect. Capture one bounded, sanitized line for source QA.
@@ -81,8 +118,10 @@ def probe(run:datetime,lead:int=2)->dict:
     return {"state":"index_observed_only","runAt":iso(run),"leadHours":lead,
             "validAt":iso(run+timedelta(hours=lead)), "url":url,
             "httpStatus":200,"nomadsLastModifiedHeader":modified,
-            "field":"TMP:2 m above ground","startByte":found.offset,
-            "endByteInclusive":end,"estimatedFieldBytes":end-found.offset+1,
+            "field":"TMP:2 m above ground","startByte":start,
+            "endByteInclusive":end,"estimatedFieldBytes":end-start+1,
+            "inventoryRecords":rows,"recordId":record_id,
+            "hasSharedGribMessage":shared,
             "gribDecoded":False,"geographicGridVerified":False,
             "sourcePublicationAt":None}
 
