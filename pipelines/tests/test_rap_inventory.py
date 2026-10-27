@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime,timedelta,timezone
 from email.message import Message
 from unittest.mock import patch
-from pipelines.rap_inventory import source_url,survey,probe
+from pipelines.rap_inventory import source_url,survey,probe,parse_rap_index
 
 NOW=datetime(2026,10,27,20,40,tzinfo=timezone.utc)
 class Resp:
@@ -32,6 +32,23 @@ class RAPSurveyTests(unittest.TestCase):
         out=survey(NOW,lambda run,lead:{"state":"not_found"})
         self.assertIsNone(out["selected"])
         self.assertFalse(out["liveProductEnabled"])
+    def test_actual_nomads_dotted_submessages_and_repeated_offset(self):
+        run=datetime(2026,10,27,18,tzinfo=timezone.utc)
+        idx=("1:0:d=2026102718:PRES:1 hybrid level:2 hour fcst:\n"
+             "15.1:100:d=2026102718:UGRD:1 hybrid level:2 hour fcst:\n"
+             "15.2:100:d=2026102718:VGRD:1 hybrid level:2 hour fcst:\n"
+             "16:400:d=2026102718:TMP:2 m above ground:2 hour fcst:\n"
+             "17:1000:d=2026102718:DPT:2 m above ground:2 hour fcst:\n")
+        start,end,count,shared,record=parse_rap_index(idx,run,2)
+        self.assertEqual((start,end,count,shared,record),(400,999,5,False,"16"))
+    def test_multi_submessage_target_is_not_silently_isolated(self):
+        run=datetime(2026,10,27,18,tzinfo=timezone.utc)
+        idx=("1:0:d=2026102718:REFC:entire atmosphere:2 hour fcst:\n"
+             "2.1:100:d=2026102718:TMP:2 m above ground:2 hour fcst:\n"
+             "2.2:100:d=2026102718:DPT:2 m above ground:2 hour fcst:\n"
+             "3:500:d=2026102718:UGRD:10 m above ground:2 hour fcst:\n")
+        self.assertTrue(parse_rap_index(idx,run,2)[3])
+
     @patch("pipelines.rap_inventory.urlopen")
     def test_actual_idx_schema(self,urlopen):
         idx=("1:0:d=2026102718:REFC:entire atmosphere:2 hour fcst:\n"
