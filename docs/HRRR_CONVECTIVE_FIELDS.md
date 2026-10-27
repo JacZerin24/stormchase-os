@@ -9,3 +9,10 @@
 **Forecast UX next:** 500-hPa height/wind/temperature, 700-hPa humidity/vertical motion, 850-hPa thermal/wind, 250–300-hPa jets/divergence, CAPE/CIN and initiation, 0–1/0–3-km SRH and 0–6-km shear, REFC/1-km reflectivity, hourly 2–5-km UH and aggregated UH swaths, updraft/downdraft, hail, lightning, precip and time accumulation. Derived diagnostics need transparent methodology and verified physical units and masks.
 
 **Future cost gate:** a provider inventory is kilobytes, but each requested GRIB message can be MBs. Budget fields by priority, georegistration domain and caching, account for repeated run/valid combos, use no automatic entire-CONUS full-file downloads, and measure CPU/storage/egress. No live/operational status is asserted by this catalog.
+
+
+## Actual source validation — October 27, 2026
+
+[NOAA inventory check 40573079639](https://github.com/JacZerin24/stormchase-os/actions/runs/40573079639) **passed for all 69 configured fields**, using a genuine NOAA NODD HRRR 2026-10-27 17Z run valid at 19Z (forecast hour 2). The first strict match found 57 records; official-source diagnostics confirmed the 12 remaining interval fields used suffixes like `1-2 hour max fcst`, `1-2 hour min fcst`, and `0-2 hour acc fcst`. Once the parser was corrected to preserve these exact descriptors, the real upstream inventory matched 69/69. Six offline semantic unit tests also passed.
+
+This proves the source inventory has exactly corresponding field/level/time-interval records in that particular cycle. It **does not** prove that their GRIB bytes were fetched, decoded or rendered; that is a separate acceptance gate. Simulated composite reflectivity and UH swaths must never be identified as live radar or verified storm/tornado tracks.
