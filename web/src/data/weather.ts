@@ -215,12 +215,16 @@ export function activeWarningGeometry(data:AlertData|null,now=Date.now()):AreaCo
       (record(f.properties) && typeof f.properties.id==='string' && eligible.has(f.properties.id))
     ))};
 }
-const SPC_URL='https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/FeatureServer/1/query';
-export function spcUrl():string {
-  return SPC_URL+'?'+new URLSearchParams({where:'1=1',outFields:'*',returnGeometry:'true',outSR:'4326',f:'geojson'});
+export type SPCDay = 1|2|3;
+export const SPC_CATEGORICAL_LAYERS:Record<SPCDay,number>={1:1,2:9,3:17};
+function spcEndpoint(day:SPCDay):string {
+  return 'https://mapservices.weather.noaa.gov/vector/rest/services/outlooks/SPC_wx_outlks/FeatureServer/'+SPC_CATEGORICAL_LAYERS[day]+'/query';
 }
-export function spcCountUrl():string {
-  return SPC_URL+'?'+new URLSearchParams({where:'1=1',returnCountOnly:'true',f:'json'});
+export function spcUrl(day:SPCDay=1):string {
+  return spcEndpoint(day)+'?'+new URLSearchParams({where:'1=1',outFields:'*',returnGeometry:'true',outSR:'4326',f:'geojson'});
+}
+export function spcCountUrl(day:SPCDay=1):string {
+  return spcEndpoint(day)+'?'+new URLSearchParams({where:'1=1',returnCountOnly:'true',f:'json'});
 }
 export function alertUrl(event:WarningRecord['event']):string {
   return 'https://api.weather.gov/alerts/active?'+new URLSearchParams({event});
@@ -252,10 +256,10 @@ async function fetchJSON(url:string,signal:AbortSignal,accept:string):Promise<un
   }
   throw new Error('Exhausted NOAA source retries.');
 }
-export async function fetchOutlook(signal:AbortSignal):Promise<OutlookData> {
+export async function fetchOutlook(signal:AbortSignal,day:SPCDay=1):Promise<OutlookData> {
   const [payload,countResponse]=await Promise.all([
-    fetchJSON(spcUrl(),signal,'application/geo+json'),
-    fetchJSON(spcCountUrl(),signal,'application/json')
+    fetchJSON(spcUrl(day),signal,'application/geo+json'),
+    fetchJSON(spcCountUrl(day),signal,'application/json')
   ]);
   if (!record(countResponse) || typeof countResponse.count!=='number' ||
       !Number.isInteger(countResponse.count) || countResponse.count<0) {

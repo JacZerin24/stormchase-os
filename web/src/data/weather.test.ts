@@ -76,6 +76,9 @@ describe('time parsing and requests',()=>{
     expect(alertUrl('Severe Thunderstorm Warning')).toContain('Severe+Thunderstorm+Warning');
     expect(spcCountUrl()).toContain('returnCountOnly=true');
     expect(spcUrl()).toContain('f=geojson');
+    expect(spcUrl(2)).toContain('/FeatureServer/9/query');
+    expect(spcUrl(3)).toContain('/FeatureServer/17/query');
+    expect(spcCountUrl(3)).toContain('/FeatureServer/17/query');
   });
   it('fetches SPC count and geometry atomically and fails closed on truncation',async()=>{
     const responses=[outlook([{type:'Feature',geometry:square,properties:outlookProps}]),{count:2}];

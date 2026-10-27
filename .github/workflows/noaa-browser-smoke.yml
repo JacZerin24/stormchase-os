@@ -1,7 +1,7 @@
 name: Experimental Chromium NOAA browser smoke
 on:
   push:
-    branches: [feat/weather-data-health-contract]
+    branches: [feat/weather-data-health-contract, feat/spc-day2-day3-categorical]
     paths:
       - 'tools/browser_smoke.py'
       - 'web/src/data/weather.ts'

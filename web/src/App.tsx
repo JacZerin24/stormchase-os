@@ -18,7 +18,7 @@ function Toggle({label,enabled,onChange}: {label:string;enabled:boolean;onChange
   return <label className="switch"><span className="sr-only">{label}</span><input type="checkbox" checked={enabled} onChange={e=>onChange(e.currentTarget.checked)}/><span className="track" aria-hidden="true"><span /></span></label>;
 }
 export default function App() {
-  const {outlook,alerts,refresh} = useWeather();
+  const {outlook,alerts,refresh,day,setDay} = useWeather();
   const [theme,setTheme] = useState<DisplayTheme>(getInitialTheme);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -46,9 +46,10 @@ export default function App() {
       <div className="sidebar-scroll" id="layers-panel">
         <div className="section-index"><span>01 / MAP OPERATIONS</span><span>CONUS</span></div>
         <div className="region-control"><label htmlFor="region-select">GO TO REGION</label><select id="region-select" value={focus.region} onChange={event => focusRegion(event.currentTarget.value as RegionKey)}>{REGION_OPTIONS.map(region => <option key={region.value} value={region.value}>{region.label}</option>)}</select><p>Presets change map extent only. They are not chase targets.</p></div>
+        <div className="region-control"><label htmlFor="spc-day">SPC CATEGORICAL PERIOD</label><select id="spc-day" value={day} onChange={event=>setDay(Number(event.currentTarget.value) as 1|2|3)}><option value={1}>Day 1</option><option value={2}>Day 2</option><option value={3}>Day 3</option></select><p>These are official categorical products. Probabilistic and conditional-intensity layers have different meanings and are not combined.</p></div>
         <h2>ACTIVE DATA LAYERS</h2>
         <article className="layer-card">
-          <div className="layer-head"><span className="layer-icon cyan">◇</span><div className="layer-name"><strong>Convective outlook</strong><small>SPC · DAY 1 CATEGORICAL</small></div><Toggle label="Show SPC outlook" enabled={showOutlook} onChange={setShowOutlook}/></div>
+          <div className="layer-head"><span className="layer-icon cyan">◇</span><div className="layer-name"><strong>Convective outlook</strong><small>SPC · DAY {day} CATEGORICAL</small></div><Toggle label="Show SPC outlook" enabled={showOutlook} onChange={setShowOutlook}/></div>
           <Status health={spcHealth}/>
           <div className="opacity-control"><label htmlFor="outlook-opacity">POLYGON OPACITY <output htmlFor="outlook-opacity">{outlookOpacity}%</output></label><input id="outlook-opacity" type="range" min="0" max="85" step="5" value={outlookOpacity} onChange={event => setOutlookOpacity(Number(event.currentTarget.value))} /></div>
           <dl className="meta"><div><dt>Issued</dt><dd>{utc(outlook.data?.times.issued)}</dd></div><div><dt>Valid from</dt><dd>{utc(outlook.data?.times.valid)}</dd></div><div><dt>Valid until</dt><dd>{utc(outlook.data?.times.expires)}</dd></div><div><dt>GIS ingested</dt><dd>{utc(outlook.data?.times.gisIngested)}</dd></div><div><dt>Last attempt</dt><dd>{utc(outlook.lastAttempt)}</dd></div><div><dt>Last retrieval</dt><dd>{utc(outlook.lastSuccess)}</dd></div></dl>

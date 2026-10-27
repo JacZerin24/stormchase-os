@@ -78,6 +78,31 @@ async def inspect(page, viewport: str) -> dict:
         raise AssertionError("Browser SPC GeoJSON request failed: "+str(result["browser_spc_fetch"]))
     if not result["browser_nws_fetch"].get("ok") or result["browser_nws_fetch"].get("type")!="FeatureCollection":
         raise AssertionError("Browser NWS GeoJSON request failed: "+str(result["browser_nws_fetch"]))
+    # Day selection is present only in the extended SPC categorical workstream.
+    if await page.locator("#spc-day").count():
+        result["spc_periods"] = [{"day":1,"metadata":result["spc_metadata"]}]
+        for day in (2,3):
+            await page.locator("#spc-day").select_option(str(day))
+            verified=False
+            for _ in range(45):
+                await page.wait_for_timeout(1000)
+                label=(await page.locator(".layer-card .feed-status").first.inner_text()).strip()
+                metadata=await page.locator("article.layer-card").first.locator(".meta").inner_text()
+                rows=metadata.splitlines()
+                known_valid="Valid from" in rows and rows.index("Valid from")+1<len(rows) and rows[rows.index("Valid from")+1]!="Unavailable"
+                if label not in ("CONNECTING","SOURCE ERROR","RETRIEVAL STALE") and known_valid:
+                    verified=True
+                    break
+                if label=="SOURCE ERROR":
+                    # Single UI refresh; persistent provider unavailability still fails.
+                    await page.get_by_role("button",name="REFRESH WEATHER DATA").click()
+                    await page.wait_for_timeout(1200)
+            if not verified:
+                raise AssertionError("SPC Day "+str(day)+" failed to become available with valid metadata")
+            if f"DAY {day} CATEGORICAL" not in await page.locator("article.layer-card").first.inner_text():
+                raise AssertionError("Displayed source label does not match selected Day "+str(day))
+            result["spc_periods"].append({"day":day,"metadata":metadata,"label":label})
+            await page.screenshot(path=str(OUTPUT/f"{viewport}-spc-day{day}.png"),full_page=True)
     await page.screenshot(path=str(OUTPUT/f"{viewport}.png"), full_page=True, timeout=25000)
     return result
 
