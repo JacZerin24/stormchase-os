@@ -44,6 +44,17 @@ def catalog(cache:Path)->dict:
         raise ValueError("Unrecognized or falsely calibrated model cache")
     if not isinstance(value.get("snapshots"),list) or len(value["snapshots"])>MAX_SNAPSHOTS:
         raise ValueError("Bad cache catalog length")
+    prior=None
+    for snap in value["snapshots"]:
+        if not isinstance(snap,dict) or not re.fullmatch(r"\d{8}T\d\dZ",str(snap.get("id",""))):
+            raise ValueError("Unsafe cache snapshot identifier")
+        if snap.get("manifest")!="runs/"+snap["id"]+"/candidate.json":
+            raise ValueError("Unsafe cache manifest path")
+        valid=when(snap.get("validAt"))
+        run=when(snap.get("runAt"))
+        if run>=valid or (prior is not None and valid>prior):
+            raise ValueError("Out-of-order snapshot UTC valid time")
+        prior=valid
     return value
 
 def update(cache:Path,source:Path,now:datetime)->dict:
