@@ -6,7 +6,7 @@ Status: **proposed in a stacked PR**; automated browser behavior is not yet veri
 
 - Map takes precedence over controls. Desktop uses a narrow layer inspector; mobile uses a collapsed bottom sheet so the map fills the viewport until controls are requested.
 - The **Go to region** control changes only a map camera extent. View presets must never be presented as meteorological targets or safe chase regions.
-- Day 1 SPC polygons support adjustable fill opacity independent of warning opacity. Layer visibility toggles do not modify provider values.
+- Day 1 SPC polygons support adjustable fill opacity independent of warning opacity. MapLibre feature sort keys draw higher categorical DN levels above lower levels if provider polygons overlap; browser comparison with SPC remains necessary. Layer visibility toggles do not modify provider values.
 - Only supported data layers are interactive. HRRR model/run selectors, soundings, chase targeting, road networks and radar remain out of the interface until verified adapters exist.
 - UTC issuance, validity, expiry and retrieval timestamps remain visible in the detail inspector. A positive fetch status is not equivalent to a current official warning service.
 - Display disabled or erroneous feeds with explicit text; never imply a blank map is hazard-free.

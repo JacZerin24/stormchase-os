@@ -35,8 +35,8 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
     map.on('load',()=>{
       map.addSource('spc-day1',{type:'geojson',data:emptyCollection()});
       map.addSource('nws-warnings',{type:'geojson',data:emptyCollection()});
-      map.addLayer({id:'spc-fill',type:'fill',source:'spc-day1',paint:{'fill-color':categoryColor,'fill-opacity':0.28}});
-      map.addLayer({id:'spc-line',type:'line',source:'spc-day1',paint:{'line-color':categoryColor,'line-width':1.5}});
+      map.addLayer({id:'spc-fill',type:'fill',source:'spc-day1',layout:{'fill-sort-key':['get','dn']},paint:{'fill-color':categoryColor,'fill-opacity':0.28}});
+      map.addLayer({id:'spc-line',type:'line',source:'spc-day1',layout:{'line-sort-key':['get','dn']},paint:{'line-color':categoryColor,'line-width':1.5}});
       map.addLayer({id:'warning-fill',type:'fill',source:'nws-warnings',paint:{'fill-color':warningColor,'fill-opacity':0.28}});
       map.addLayer({id:'warning-line',type:'line',source:'nws-warnings',paint:{'line-color':warningColor,'line-width':2.4}});
       map.on('click','spc-fill',(e)=>{
