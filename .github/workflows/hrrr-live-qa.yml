@@ -1,0 +1,35 @@
+name: Experimental live HRRR GRIB/eccodes QA
+on:
+  push:
+    branches: [feat/hrrr-index-range-ingestion-pilot]
+    paths:
+      - 'pipelines/grib_inspect.py'
+      - '.github/workflows/hrrr-live-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  single-field:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install ecCodes library and NumPy for GRIB decoding
+        run: python -m pip install 'eccodes==2.44.0' 'numpy>=1.26,<3'
+      - name: Acquire bounded official HRRR 12Z f06 2m temperature
+        run: |
+          python -m pipelines.hrrr_subset --run 2026-10-27T12:00:00Z --lead 6 --variable TMP --level "2 m above ground" --out /tmp/hrrr-tmp2m-f06.grib2
+      - name: ecCodes decode/QC and emit reproducible metadata
+        run: |
+          python -m pipelines.grib_inspect --path /tmp/hrrr-tmp2m-f06.grib2 --run 2026-10-27T12:00:00Z --lead 6 --out reports/hrrr-grib-metadata.json
+      - name: Preserve metadata report only, never full raw GRIB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-live-grib-qc
+          path: reports/hrrr-grib-metadata.json
+          if-no-files-found: warn
+          retention-days: 14
