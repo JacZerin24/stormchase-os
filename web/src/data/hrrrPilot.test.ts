@@ -1,4 +1,6 @@
 import {describe,it,expect} from 'vitest';
+import {readFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
 import {parsePilotManifest,pilotOverlay} from './hrrrPilot';
 const sha='a'.repeat(64);
 const product=(runAt:string,leadHours:number)=>({
@@ -34,5 +36,21 @@ describe('archived HRRR pilot',()=>{
  it('forbids promotion to live from historical static product',()=>{
   expect(()=>parsePilotManifest({...manifest,status:'current'})).toThrow();
   expect(()=>parsePilotManifest({...manifest,validAt:'2026-10-28T18:00:00Z'})).toThrow();
+ });
+});
+
+
+describe('shipped real HRRR archived data files',()=>{
+ it('validates the actual manifest and all packaged image/COG hashes',()=>{
+  const root=new URL('../../public/pilot/hrrr-20261027-18z/',import.meta.url);
+  const manifest=parsePilotManifest(JSON.parse(readFileSync(new URL('manifest.json',root),'utf-8')) as unknown);
+  const digest=(filename:string)=>createHash('sha256').update(readFileSync(new URL(filename,root))).digest('hex');
+  expect(digest(manifest.differenceImage)).toBe(manifest.difference_sha256);
+  for(const p of manifest.products){
+   expect(digest(p.image)).toBe(p.image_sha256);
+   expect(digest(p.cog)).toBe(p.cog_sha256);
+   expect(p.geolocation_QA.coverage_fraction).toBeGreaterThanOrEqual(0.97);
+  }
+  expect(manifest.products[0].validAt).toBe(manifest.products[1].validAt);
  });
 });
