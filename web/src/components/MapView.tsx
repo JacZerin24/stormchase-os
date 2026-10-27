@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl, { type Map as MapInstance, type GeoJSONSource } from 'maplibre-gl';
 import { emptyCollection, SPC_CATEGORIES, type AreaCollection } from '../data/weather';
+import { REGION_BOUNDS, type RegionKey } from '../data/regions';
 
 type Props = {
   outlook: AreaCollection | null;
@@ -8,11 +9,13 @@ type Props = {
   showOutlook: boolean;
   showWarnings: boolean;
   onCoordinates: (value:string)=>void;
+  focus: { region: RegionKey; revision: number };
+  outlookOpacity: number;
 };
 const categoryColor = ['match',['get','dn'],2,'#c1e9c1',3,'#66a366',4,'#ffe066',5,'#ffa366',6,'#e06666',8,'#ee99ee','#96a8b8'] as any;
 const warningColor = ['match',['get','event'],'Tornado Warning','#fb4b69','Severe Thunderstorm Warning','#ffb04d','#cedbe2'] as any;
 
-export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoordinates}:Props) {
+export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoordinates,focus,outlookOpacity}:Props) {
   const element = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapInstance | null>(null);
   const [ready,setReady] = useState(false);
@@ -62,6 +65,14 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
     for (const id of ['spc-fill','spc-line']) m.setLayoutProperty(id,'visibility',showOutlook?'visible':'none');
     for (const id of ['warning-fill','warning-line']) m.setLayoutProperty(id,'visibility',showWarnings?'visible':'none');
   },[ready,showOutlook,showWarnings]);
+  useEffect(()=>{
+    const m=mapRef.current;
+    if (ready && m) m.setPaintProperty('spc-fill','fill-opacity',outlookOpacity);
+  },[ready,outlookOpacity]);
+  useEffect(()=>{
+    const m=mapRef.current;
+    if (ready && m) m.fitBounds(REGION_BOUNDS[focus.region], {padding:36,duration:450,maxZoom:7});
+  },[ready,focus]);
   return <div className="map-host">
     <div ref={element} className="map-canvas" role="application" aria-label="Interactive CONUS weather map" />
     {mapError&&<div className="map-error" role="status">{mapError}</div>}

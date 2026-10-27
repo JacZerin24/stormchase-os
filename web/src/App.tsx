@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import MapView from './components/MapView';
 import { isExpired, isRetrievalStale, NWS_INFO, SPC_CATEGORIES, SPC_INFO } from './data/weather';
 import { useWeather, type FeedState } from './hooks/useWeather';
+import { REGION_OPTIONS, type RegionKey } from './data/regions';
 
 function utc(value: string | null | undefined): string {
   if (!value) return 'Unavailable';
@@ -20,6 +21,10 @@ export default function App() {
   const {outlook,alerts,refresh} = useWeather();
   const [showOutlook,setShowOutlook] = useState(true);
   const [showWarnings,setShowWarnings] = useState(true);
+  const [outlookOpacity,setOutlookOpacity] = useState(42);
+  const [focus,setFocus] = useState<{ region: RegionKey; revision: number }>({region:'conus',revision:0});
+  const [sheetOpen,setSheetOpen] = useState(false);
+  const focusRegion = (region: RegionKey) => setFocus(previous => ({region, revision:previous.revision+1}));
   const [coords,setCoords] = useState('CONUS INITIAL VIEW');
   const [now,setNow] = useState(Date.now());
   useEffect(()=>{const id=window.setInterval(()=>setNow(Date.now()),60000);return ()=>window.clearInterval(id);},[]);
@@ -28,14 +33,17 @@ export default function App() {
   const nwsOld = isRetrievalStale(alerts.lastSuccess,now);
   return <div className="shell">
     <aside className="rail" aria-hidden="true"><div className="rail-mark">S°</div><div className="rail-line"/><div className="rail-icon">◈</div><div className="rail-version">V0.1</div></aside>
-    <section className="sidebar" aria-label="Weather data layers">
+    <section className={`sidebar ${sheetOpen ? 'is-open' : ''}`} aria-label="Weather data layers">
+      <button type="button" className="sheet-trigger" aria-expanded={sheetOpen} aria-controls="layers-panel" onClick={() => setSheetOpen(value => !value)}><span className="sheet-handle" aria-hidden="true" /><span>LAYERS & DATA STATUS</span><span className="sheet-chevron" aria-hidden="true">{sheetOpen ? '⌄' : '⌃'}</span></button>
       <header className="brand"><small>METEOROLOGICAL WORKSPACE</small><h1>STORMCHASE <em>OS</em></h1><div><span className="pulse"/> FORECAST INTELLIGENCE <span className="version">/ V0.1</span></div></header>
-      <div className="sidebar-scroll">
+      <div className="sidebar-scroll" id="layers-panel">
         <div className="section-index"><span>01 / MAP OPERATIONS</span><span>CONUS</span></div>
+        <div className="region-control"><label htmlFor="region-select">GO TO REGION</label><select id="region-select" value={focus.region} onChange={event => focusRegion(event.currentTarget.value as RegionKey)}>{REGION_OPTIONS.map(region => <option key={region.value} value={region.value}>{region.label}</option>)}</select><p>Presets change map extent only. They are not chase targets.</p></div>
         <h2>ACTIVE DATA LAYERS</h2>
         <article className="layer-card">
           <div className="layer-head"><span className="layer-icon cyan">◇</span><div className="layer-name"><strong>Convective outlook</strong><small>SPC · DAY 1 CATEGORICAL</small></div><Toggle label="Show SPC outlook" enabled={showOutlook} onChange={setShowOutlook}/></div>
           <Status feed={outlook} now={now}/>
+          <div className="opacity-control"><label htmlFor="outlook-opacity">POLYGON OPACITY <output htmlFor="outlook-opacity">{outlookOpacity}%</output></label><input id="outlook-opacity" type="range" min="0" max="85" step="5" value={outlookOpacity} onChange={event => setOutlookOpacity(Number(event.currentTarget.value))} /></div>
           <dl className="meta"><div><dt>Issued</dt><dd>{utc(outlook.data?.times.issued)}</dd></div><div><dt>Valid from</dt><dd>{utc(outlook.data?.times.valid)}</dd></div><div><dt>Valid until</dt><dd>{utc(outlook.data?.times.expires)}</dd></div><div><dt>Last retrieval</dt><dd>{utc(outlook.lastSuccess)}</dd></div></dl>
           {expired&&<p className="warning">Outlook has expired. The polygon overlay is hidden.</p>}
           {(outlook.state==='error'||spcOld)&&<p className="warning">SPC polygons hidden: feed is unavailable or stale. {outlook.error}</p>}
@@ -57,12 +65,13 @@ export default function App() {
     </section>
     <main className="main-area">
       <MapView outlook={outlook.data?.geometry??null} warnings={alerts.data?.geometry??null}
+        focus={focus} outlookOpacity={outlookOpacity/100}
         showOutlook={showOutlook&&outlook.state==='ready'&&!expired&&!spcOld}
         showWarnings={showWarnings&&alerts.state==='ready'&&!nwsOld}
         onCoordinates={setCoords}/>
-      <div className="map-header"><div className="map-title"><span>◈</span><div><small>FORECAST CENTER</small><strong>National Overview</strong></div></div><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div>
-      <div className="map-label">■ &nbsp; CONTIGUOUS UNITED STATES <span>/ LIVE DATA VIEW</span></div>
-      <div className="map-footer"><span>{coords}</span><span><i/> NOAA LIVE FEEDS · NOT GUARANTEED</span></div>
+      <div className="map-header"><div className="map-title"><span>◈</span><div><small>FORECAST CENTER</small><strong>National Overview</strong></div></div><div className="map-header-actions"><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET CONUS EXTENT</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
+      <div className="map-label">■ &nbsp; CONTIGUOUS UNITED STATES <span>/ LATEST RETRIEVED PRODUCTS</span></div>
+      <div className="map-footer"><span>{coords}</span><span className={outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'feeds-ok' : 'feeds-degraded'}><i/> {outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'FEEDS RETRIEVED · LATENCY POSSIBLE' : 'CHECK SOURCE STATUS · NOT ALERT DELIVERY'}</span></div>
     </main>
   </div>;
 }
