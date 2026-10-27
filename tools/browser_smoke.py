@@ -88,7 +88,9 @@ async def inspect(page, viewport: str) -> dict:
                 await page.wait_for_timeout(1000)
                 label=(await page.locator(".layer-card .feed-status").first.inner_text()).strip()
                 metadata=await page.locator("article.layer-card").first.locator(".meta").inner_text()
-                if label not in ("CONNECTING","SOURCE ERROR","RETRIEVAL STALE") and "Valid from\\nUnavailable" not in metadata:
+                rows=metadata.splitlines()
+                known_valid="Valid from" in rows and rows.index("Valid from")+1<len(rows) and rows[rows.index("Valid from")+1]!="Unavailable"
+                if label not in ("CONNECTING","SOURCE ERROR","RETRIEVAL STALE") and known_valid:
                     verified=True
                     break
                 if label=="SOURCE ERROR":
