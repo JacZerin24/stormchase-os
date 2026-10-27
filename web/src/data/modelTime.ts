@@ -33,6 +33,11 @@ export function strictUtc(value:unknown):string {
   }
   const time=Date.parse(value);
   if(!Number.isFinite(time))throw new Error('Invalid timestamp');
+  const offsetText=value.slice(-1)==='Z' ? 'Z' : value.slice(-6);
+  const offsetMinutes=offsetText==='Z' ? 0 : (offsetText[0]==='-'?-1:1)*
+    (Number(offsetText.slice(1,3))*60+Number(offsetText.slice(4,6)));
+  const local=new Date(time+offsetMinutes*60_000).toISOString().slice(0,19);
+  if(local!==value.slice(0,19))throw new Error('Invalid calendar date or clock time');
   return new Date(time).toISOString();
 }
 function string(x:unknown,name:string):string {
