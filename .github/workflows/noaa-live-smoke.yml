@@ -1,0 +1,30 @@
+name: NOAA live provider smoke (NOT browser QA)
+on:
+  push:
+    branches: [test/noaa-live-source-evidence]
+  workflow_dispatch:
+  pull_request:
+    paths: ['tools/noaa_source_smoke.py', 'tools/tests/**', '.github/workflows/noaa-live-smoke.yml']
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline report tests
+        run: python -m unittest discover -s tools/tests -v
+      - name: NOAA official upstream HTTPS checks
+        run: python -m tools.noaa_source_smoke --out reports/noaa-source-smoke.json
+      - name: Preserve audit summary regardless of upstream failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: noaa-upstream-smoke
+          path: reports/noaa-source-smoke.json
+          if-no-files-found: warn
+          retention-days: 14
