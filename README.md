@@ -41,6 +41,7 @@ The locked Vite development server prints the local address. A web browser with 
 - [Hourly HRRR availability monitor](docs/HRRR_INVENTORY_MONITOR.md)
 - [Bounded observed-availability history](docs/HRRR_AVAILABILITY_HISTORY.md)
 - [Georeferenced historical HRRR research case](docs/HRRR_GEOREFERENCING_PILOT.md)
+- [Comprehensive HRRR convective forecasting and UH track roadmap](docs/HRRR_CONVECTION_ROADMAP.md)
 - [NOAA live browser QA limitations](docs/NOAA_BROWSER_QA.md)
 
 ## Deployment
