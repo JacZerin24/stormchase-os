@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {HRRR_PILOT_PATH,parsePilotManifest,pilotOverlay,type PilotManifest,type PilotMode} from './data/hrrrPilot';
-import {CONV_ARCHIVE_PATH,CONV_DISPLAY,convectiveImage,parseConvectiveManifest,type ConvectiveManifest,type ConvDisplayKey} from './data/hrrrConvective';
+import {CONV_ARCHIVE_PATH,CONV_DISPLAY,CONV_LEGENDS,convectiveLegendCss,convectiveImage,parseConvectiveManifest,type ConvectiveManifest,type ConvDisplayKey} from './data/hrrrConvective';
 import MapView from './components/MapView';
 import {activeWarningGeometry,NWS_INFO,SPC_CATEGORIES,SPC_INFO} from './data/weather';
 import {outlookHealth,warningHealth,type WeatherHealth} from './data/freshness';
@@ -141,6 +141,15 @@ export default function App() {
               </select>
               <p>{CONV_DISPLAY[convectiveField].notice}</p>
             </div>
+            <div className="convective-legend" role="img" aria-label={'Fixed color scale for '+CONV_DISPLAY[convectiveField].title}>
+              <div className="legend-range-heading">FIXED FORECAST SCALE · {CONV_LEGENDS[convectiveField].unit}</div>
+              <div className="legend-color-ramp" style={{background:convectiveLegendCss(convectiveField)}}/>
+              <div className="legend-color-ticks"><span>{CONV_LEGENDS[convectiveField].ticks[0]}</span><span>{CONV_LEGENDS[convectiveField].ticks[Math.floor(CONV_LEGENDS[convectiveField].ticks.length/2)]}</span><span>{CONV_LEGENDS[convectiveField].ticks[CONV_LEGENDS[convectiveField].ticks.length-1]}</span></div>
+            </div>
+            {CONV_LEGENDS[convectiveField].maskBelow!==null&&
+              <p className="caveat">Pixels below {CONV_LEGENDS[convectiveField].maskBelow} {CONV_LEGENDS[convectiveField].unit} are transparent, not missing source data.</p>}
+            {convectiveField.startsWith('uh25')&&convectiveManifest.fieldProducts[convectiveField].maxValue<25&&
+              <p className="warning">This archived region did not reach the 25 m²/s² color threshold in this simulated product. Blank shading does not establish the absence of real storms or tornado potential.</p>}
             <button type="button" className="model-focus" onClick={()=>{setConvectiveEnabled(true);setPilotEnabled(false);setPilotFocusRevision(i=>i+1);}}>FOCUS ARCHIVED PLAINS REGION</button>
             <p className="caveat">QA: native source run/level/step, geographic pixel checks and hashes. Independent forecast verification and observed storm-object tracking are not complete.</p>
           </> : <p className="warning">{convectiveLoadError??'Checking real archived convective GRIB assets...'}</p>}
