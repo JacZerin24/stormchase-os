@@ -38,6 +38,7 @@ def probe(run:datetime,lead:int=2)->dict:
             status=r.status
             data=r.read(MAX_IDX_BYTES+1)
             modified=r.headers.get("Last-Modified")
+            mime=r.headers.get("Content-Type")
     except HTTPError as e:
         return {"state":"not_found" if e.code==404 else "source_error",
                 "runAt":iso(run),"leadHours":lead,
@@ -56,8 +57,12 @@ def probe(run:datetime,lead:int=2)->dict:
         if not 0<end-found.offset+1<64*1024*1024:
             raise ValueError("Invalid RAP message size")
     except (ValueError,UnicodeDecodeError) as e:
+        # HTTP 200 sometimes transports provider error HTML or a different
+        # index dialect. Capture one bounded, sanitized line for source QA.
+        first_line=data[:240].decode("utf8",errors="replace").splitlines()[0][:120] if data else ""
         return {"state":"invalid_inventory","runAt":iso(run),"leadHours":lead,
-                "url":url,"httpStatus":status,"error":str(e)[:160]}
+                "url":url,"httpStatus":status,"mime":mime,
+                "firstLineSample":first_line,"error":str(e)[:160]}
     return {"state":"index_observed_only","runAt":iso(run),"leadHours":lead,
             "validAt":iso(run+timedelta(hours=lead)), "url":url,
             "httpStatus":200,"nomadsLastModifiedHeader":modified,
