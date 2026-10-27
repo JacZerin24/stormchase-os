@@ -3,7 +3,7 @@
   "status": "historical-experimental-display-not-live",
   "provider": "NOAA NODD HRRR public archive",
   "sourceGribLicense": "NOAA public forecast data; check source terms for downstream redistribution",
-  "generatedAt": "2026-10-27T18:30:20.401266Z",
+  "generatedAt": "2026-10-27T18:40:48.861533Z",
   "validAt": "2026-10-27T18:00:00Z",
   "bounds": [
     -103.0,
@@ -113,7 +113,13 @@
         "p95_nearest_km": 1.7961306669489205,
         "median_nearest_km": 1.195806276906632,
         "unmatched_cells": 0,
-        "source_valid_points_in_buffer": 71024
+        "source_valid_points_in_buffer": 71024,
+        "eccodes_registered_pixel_spotcheck": {
+          "checked_output_pixel_centers": 16,
+          "max_abs_temperature_residual_K": 0.0,
+          "max_eccodes_distance_km": 1.9638150220528332,
+          "method": "direct ecCodes nearest query at registered output pixel centers"
+        }
       },
       "min_K": 281.0657043457031,
       "max_K": 300.6282043457031
@@ -137,7 +143,13 @@
         "p95_nearest_km": 1.7961306669489205,
         "median_nearest_km": 1.195806276906632,
         "unmatched_cells": 0,
-        "source_valid_points_in_buffer": 71024
+        "source_valid_points_in_buffer": 71024,
+        "eccodes_registered_pixel_spotcheck": {
+          "checked_output_pixel_centers": 16,
+          "max_abs_temperature_residual_K": 0.0,
+          "max_eccodes_distance_km": 1.9638150220528332,
+          "method": "direct ecCodes nearest query at registered output pixel centers"
+        }
       },
       "min_K": 281.4867858886719,
       "max_K": 300.2992858886719
