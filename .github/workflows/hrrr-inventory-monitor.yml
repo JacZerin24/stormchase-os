@@ -11,7 +11,7 @@ on:
       - 'pipelines/tests/test_hrrr_inventory.py'
       - '.github/workflows/hrrr-inventory-monitor.yml'
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: hrrr-inventory-monitor
   cancel-in-progress: false
@@ -26,13 +26,39 @@ jobs:
           python-version: '3.12'
       - name: Offline discovery semantics and failure tests
         run: python -m unittest pipelines.tests.test_hrrr_inventory -v
+      - name: Observation-history time semantics tests
+        run: python -m unittest pipelines.tests.test_hrrr_state -v
       - name: Probe current NOAA HRRR indices only (no GRIB download)
         run: python -m pipelines.hrrr_inventory --out reports/hrrr-inventory.json
+      - name: Read existing durable observation ledger (main branch only)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git fetch --no-tags origin refs/heads/telemetry/hrrr-inventory
+          git show FETCH_HEAD:data/hrrr-inventory-state.json > reports/hrrr-inventory-previous.json
+      - name: Merge actual first-observed times into bounded ledger
+        if: github.ref == 'refs/heads/main'
+        run: |
+          python -m pipelines.hrrr_state --previous reports/hrrr-inventory-previous.json --report reports/hrrr-inventory.json --out reports/hrrr-inventory-updated.json
+      - name: Commit only to telemetry branch (no model imagery/Pages deploy)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B telemetry/hrrr-inventory FETCH_HEAD
+          mkdir -p data
+          cp reports/hrrr-inventory-updated.json data/hrrr-inventory-state.json
+          git add data/hrrr-inventory-state.json
+          if ! git diff --cached --quiet; then
+            git commit -m "data(telemetry): record latest observed HRRR inventory"
+            git push origin HEAD:refs/heads/telemetry/hrrr-inventory
+          fi
       - name: Save timestamped evidence without repo/page writes
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: hrrr-inventory-observation
-          path: reports/hrrr-inventory.json
+          path: |
+            reports/hrrr-inventory.json
+            reports/hrrr-inventory-updated.json
           if-no-files-found: warn
           retention-days: 14

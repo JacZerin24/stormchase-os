@@ -1,0 +1,11 @@
+# Durable HRRR first-observation history
+
+This is a **five-day bounded telemetry ledger**, not an actual NOAA first-publication database, archive of raw GRIB data, nowcasting service or observation of atmospheric conditions. The main-branch hourly metadata monitor records up to ten index requests (same two-model-run f03/f02 sequence) and after each check writes an append-or-update state on a **separate telemetry/hrrr-inventory Git branch**. This avoids automatically rebuilding GitHub Pages or overwriting scientifically validated model assets every hour.
+
+Per model initialization/lead, retain firstObservedIndexAt, lastObservedIndexAt, lastObserved404At, latest observation status, S3 index Last-Modified/ETag, and optional indexBecameObservableBetween=[last observed 404, first observed HTTP200]. A connection failure or rate limit is NOT treated as a confirmed 404, and first observed is never backdated or silently reset. No first-publication time is inferred. If the first probe already sees HTTP200, there is **no lower bound** on earliest source visibility.
+
+State is capped at five days and 300 index records. Writes are serialized under the existing GitHub Actions concurrency group and require contents:write permission only for the dedicated telemetry branch. State is only updated on main; PR branch CI exercises offline tests without writing shared history. Artifact reports retain the full check detail for 14 days.
+
+**Cost:** one small JSON file update/commit per hourly Actions run, no GitHub Pages redeployment and no recurring GRIB bulk transfer. A future data store or dedicated metadata service will be preferable as traffic/retention grows; periodically review repository telemetry branch growth and GitHub Actions policy. GitHub cron execution can be delayed or dropped and is not a reliability guarantee.
+
+Run locally: python -m unittest pipelines.tests.test_hrrr_state -v. Initial state is checked in only to the telemetry branch, not main. On a source or GitHub branch write failure the workflow fails visibly; it must not silently claim observation was persisted.
