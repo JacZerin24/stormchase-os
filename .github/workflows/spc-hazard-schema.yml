@@ -1,0 +1,28 @@
+name: SPC hazard and conditional-intensity official schema survey
+on:
+  push:
+    branches: [research/spc-hazard-layer-live-schemas]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Synthetic survey structure tests
+        run: python -m unittest discover -s tools/tests -v
+      - name: One-off real official SPC ArcGIS attribute inventory
+        run: python -m tools.spc_hazard_survey --out reports/spc-hazard-inventory.json
+      - name: Preserve evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spc-hazard-layer-inventory
+          path: reports/spc-hazard-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
