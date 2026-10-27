@@ -93,5 +93,13 @@ def main()->None:
     args.out.parent.mkdir(parents=True,exist_ok=True)
     args.out.write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({k:report[k] for k in ('runAt','validAt','checkedProducts','indexVerified')},indent=2))
-    print('Not index-verified:',{k:v['status'] for k,v in report['products'].items() if v['status']!='index_verified'})
+    bad=[k for k,v in report['products'].items() if v['status']!='index_verified']
+    print('Not index-verified:',{k:report['products'][k]['status'] for k in bad})
+    if bad:
+        entries=parse_idx(fetch_index(report['source']),utc_cycle(args.run))
+        for key in bad:
+            spec=FIELDS[key]
+            candidates=[(x.variable,x.level,x.descriptor) for x in entries
+                        if (x.variable,x.level)==(spec.variable,spec.level)]
+            print('source candidates for',key,':',candidates[:8])
 if __name__=='__main__':main()
