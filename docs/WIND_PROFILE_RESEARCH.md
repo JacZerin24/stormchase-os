@@ -17,3 +17,10 @@ Before integration in StormChase OS:
 4. Connect map point selection to the profile provider and build a reviewed, accessibility-tested Skew-T/hodograph component.
 
 Reference formulas: https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.storm_relative_helicity.html ; https://unidata.github.io/MetPy/latest/api/generated/metpy.calc.bunkers_storm_motion.html ; https://unidata.github.io/MetPy/v1.6/api/generated/metpy.calc.bulk_shear.html .
+
+
+## Independent formula comparison — 2026-10-27
+
+[GitHub Actions run 40553922597](https://github.com/JacZerin24/stormchase-os/actions/runs/40553922597) passed reference comparisons using pinned `MetPy==1.7.1`. An earlier failing test exposed a ~0.94 m/s Bunkers right-mover discrepancy from **height-weighted vs pressure-coordinate-weighted** mean winds. The implementation now requires an explicit strictly decreasing pressure profile corresponding to the AGL wind heights, and integrates winds with respect to pressure as in MetPy's `weighted_continuous_average` implementation. It also passed nonuniform-profile SRH and bulk-shear comparisons. Do not silently substitute geometric-height weighting under the same method name.
+
+The reference profiles remain synthetic. Real observed/raw model sounding samples, metadata/QC, thermodynamics and complex edge-case validation are **not complete**. No operational sounding or hodograph service is claimed.
