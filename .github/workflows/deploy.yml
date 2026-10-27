@@ -30,7 +30,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -e
-          runs="$(gh run list --workflow hrrr-live-publish.yml --status success --limit 10 --json databaseId --jq '.[].databaseId')"
+          runs="$(gh run list --workflow hrrr-live-publish.yml --branch main --status success --limit 10 --json databaseId --jq '.[].databaseId')"
           if [ -n "$runs" ]; then
             mkdir -p web/public/live/hrrr
             found=false
