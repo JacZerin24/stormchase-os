@@ -36,7 +36,7 @@ class MetPyReferenceTests(unittest.TestCase):
         self.assertAlmostEqual(ours[1],float(v.to('m/s').magnitude),delta=0.1)
 
     def test_bunkers_mean_right_left(self):
-        ours=bunkers_motion(WIND)
+        ours=bunkers_motion(WIND,list(PRESSURE))
         right,left,mean=metpy_bunkers(PRESSURE*units.hPa,U*units('m/s'),
                                       V*units('m/s'),HEIGHT*units.meter)
         for name,ref in (('right',right),('left',left),('mean',mean)):
