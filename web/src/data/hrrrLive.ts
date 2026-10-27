@@ -64,7 +64,7 @@ export function parseLiveCandidate(raw:unknown,entry:Item):LiveCandidate{
   if(!isObj(x)||x.key!==(i===0?'older':'newer')||x.file!==(i===0?'older.png':'newer.png')||
      x.cog!==(i===0?'older.tif':'newer.tif')||!sha(x.sha256)||!sha(x.cogSha256)||
      !sha(x.sourceSha256)||!ts(x.runAt)||!ts(x.validAt)||x.validAt!==entry.validAt||
-     x.leadHours!==(i===0?3:2)||dateMs(x.runAt)+x.leadHours*3_600_000!==dateMs(x.validAt)||
+     typeof x.leadHours!=='number'||x.leadHours!==(i===0?3:2)||dateMs(x.runAt)+x.leadHours*3_600_000!==dateMs(x.validAt)||
      x.units!=='K'||typeof x.geoCoverage!=='number'||x.geoCoverage<.97||
      typeof x.nativeDistanceKm!=='number'||x.nativeDistanceKm>5.01)
    throw new Error('Recent HRRR run metadata invalid or incomplete');
