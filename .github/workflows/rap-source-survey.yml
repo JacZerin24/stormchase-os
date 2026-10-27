@@ -1,0 +1,28 @@
+name: RAP source metadata survey (no GRIB or map)
+on:
+  push:
+    branches: [research/rap-source-inventory-qa]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  survey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate RAP filename, UTC and idx contracts offline
+        run: python -m unittest pipelines.tests.test_rap_inventory -v
+      - name: One-shot official NOMADS RAP source index survey
+        run: python -m pipelines.rap_inventory --out reports/rap-source-survey.json
+      - name: Preserve metadata-only results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rap-noaa-source-inventory
+          path: reports/rap-source-survey.json
+          if-no-files-found: warn
+          retention-days: 14
