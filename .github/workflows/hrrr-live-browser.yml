@@ -1,7 +1,7 @@
 name: Source-verified recent HRRR browser acceptance
 on:
   push:
-    branches: [feat/hrrr-live-controlled-publisher]
+    branches: [feat/hrrr-live-controlled-publisher, fix/hrrr-phase1-monitoring-and-feed-health]
     paths:
       - 'web/src/**'
       - 'tools/hrrr_live_browser.py'
@@ -26,7 +26,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p web/public/live/hrrr
-          gh run download 40586637851 -n hrrr-live-cache -D web/public/live/hrrr
+          set -e
+          found=false
+          for run in $(gh run list --workflow hrrr-live-publish.yml --branch main --status success --limit 12 --json databaseId --jq '.[].databaseId'); do
+            if gh run download "$run" -n hrrr-live-cache -D web/public/live/hrrr; then
+              python -c 'from pathlib import Path;from pipelines.hrrr_pages_cache import verify;verify(Path("web/public/live/hrrr"))'
+              found=true
+              break
+            fi
+            rm -rf web/public/live/hrrr
+            mkdir -p web/public/live/hrrr
+          done
+          if [ "$found" != true ]; then echo "No verified live HRRR cache available"; exit 1; fi
       - name: Install locked web and browser environment
         run: |
           cd web
