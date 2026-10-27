@@ -28,6 +28,21 @@ def source_url(run:datetime,lead:int)->str:
     return f"{BASE}/rap.{run:%Y%m%d}/rap.t{run:%H}z.awp130bgrbf{lead:02d}.grib2.idx"
 
 
+def diagnosis(text:str)->dict:
+    previous=-1
+    for n,line in enumerate(text.splitlines(),1):
+        if not line.strip():continue
+        parts=line.split(":")
+        if (len(parts)<6 or not parts[0].isdigit() or not parts[1].isdigit() or
+            not parts[2].startswith("d=")):
+            return {"lineNumber":n,"reason":"non-HRRR-wgrib2 integer record syntax","sample":line[:140]}
+        off=int(parts[1])
+        if off<=previous:
+            return {"lineNumber":n,"reason":"repeated/nonmonotonic GRIB offset","sample":line[:140]}
+        previous=off
+    return {"reason":"index serial/cycle/uniqueness rules differ from HRRR"}
+
+
 def probe(run:datetime,lead:int=2)->dict:
     url=source_url(run,lead)
     try:
@@ -62,7 +77,7 @@ def probe(run:datetime,lead:int=2)->dict:
         first_line=data[:240].decode("utf8",errors="replace").splitlines()[0][:120] if data else ""
         return {"state":"invalid_inventory","runAt":iso(run),"leadHours":lead,
                 "url":url,"httpStatus":status,"mime":mime,
-                "firstLineSample":first_line,"error":str(e)[:160]}
+                "firstLineSample":first_line,"diagnosis":diagnosis(data.decode("utf8",errors="replace")),"error":str(e)[:160]}
     return {"state":"index_observed_only","runAt":iso(run),"leadHours":lead,
             "validAt":iso(run+timedelta(hours=lead)), "url":url,
             "httpStatus":200,"nomadsLastModifiedHeader":modified,
