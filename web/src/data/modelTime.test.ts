@@ -13,6 +13,7 @@ describe('model asset contract',()=>{
  it('requires explicit UTC/offset and precise run/valid time matching',()=>{
   expect(strictUtc('2026-10-27T13:00:00-05:00')).toBe('2026-10-27T18:00:00.000Z');
   expect(()=>strictUtc('2026-10-27T18:00:00')).toThrow();
+  expect(()=>strictUtc('2026-02-30T18:00:00Z')).toThrow();
   expect(()=>parseModelFieldAsset({...base,leadHours:5})).toThrow(/mismatch/);
  });
  it('requires full QA provenance before advertising a field as map-ready',()=>{
