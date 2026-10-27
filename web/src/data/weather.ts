@@ -225,10 +225,32 @@ export function spcCountUrl():string {
 export function alertUrl(event:WarningRecord['event']):string {
   return 'https://api.weather.gov/alerts/active?'+new URLSearchParams({event});
 }
+// Two short bounded retries for transient NOAA network/CORS/5xx failures.
+// Persistent CORS problems still fail visibly; this is not an alert-delivery service.
+function abortablePause(ms:number,signal:AbortSignal):Promise<void> {
+  return new Promise((resolve,reject)=>{
+    if(signal.aborted) {reject(signal.reason??new DOMException('Aborted','AbortError'));return;}
+    const stop=()=>{clearTimeout(timer);reject(signal.reason??new DOMException('Aborted','AbortError'));};
+    const timer=setTimeout(()=>{signal.removeEventListener('abort',stop);resolve();},ms);
+    signal.addEventListener('abort',stop,{once:true});
+  });
+}
 async function fetchJSON(url:string,signal:AbortSignal,accept:string):Promise<unknown> {
-  const response=await fetch(url,{headers:{Accept:accept},cache:'no-cache',signal});
-  if (!response.ok) throw new Error('HTTP '+response.status+' from '+new URL(url).host);
-  return response.json() as Promise<unknown>;
+  for(let attempt=0;attempt<3;attempt++){
+    try {
+      const response=await fetch(url,{headers:{Accept:accept},cache:'no-cache',signal});
+      if(!response.ok) {
+        if(![429,500,502,503,504].includes(response.status)||attempt===2){
+          throw new Error('HTTP '+response.status+' from '+new URL(url).host);
+        }
+      } else return response.json() as Promise<unknown>;
+    } catch(error) {
+      if(signal.aborted || attempt===2) throw error;
+      if(error instanceof Error && error.message.startsWith('HTTP ')) throw error;
+    }
+    await abortablePause(attempt===0?350:1200,signal);
+  }
+  throw new Error('Exhausted NOAA source retries.');
 }
 export async function fetchOutlook(signal:AbortSignal):Promise<OutlookData> {
   const [payload,countResponse]=await Promise.all([
