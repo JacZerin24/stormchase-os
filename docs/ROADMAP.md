@@ -9,7 +9,7 @@
 | HRRR inventory | Hourly `.idx` source checks; five-day durable first-observed index ledger on separate telemetry branch | Do not confuse HTTP index observation with first published GRIB; measure more cycles and reliability |
 | Recent HRRR staging | Genuine recent f03/f02 same-valid-time temperature pipeline, measured 2.36 MB transfer / 184 KB derived assets / 29.9 s Python walltime in one run | Storage/retention/egress budget and independent field QA before enabling live public maps |
 | SPC probabilities/CIG | Real official layer attribute schema sampled, labels and DN semantics distinguished | Complete probability and CIG graphic/geometry/definitions and live overlay tests |
-| RAP | Official NOMADS filename discovered; provider-specific index under research | Parsing/GRIB metadata/geospatial alignment not verified; no RAP map |
+| RAP | Official NOMADS RAP f02/2-m temperature inventory verified, including dotted GRIB submessages | Full RAP GRIB decoding, numerical/geospatial QA and HRRR alignment not verified; no RAP map |
 | Soundings/hodographs | Experimental wind-only diagnostics compared to pinned MetPy synthetic profiles | Observed/model profile provenance, thermodynamics and observed-case verification |
 
 **Caveat:** Production Pages and CI success do not by themselves demonstrate operational accuracy or warning delivery. Experimental assets are deliberately identified, and no model outputs are presented as independently calibrated severe-weather probabilities.

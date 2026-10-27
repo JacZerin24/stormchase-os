@@ -9,7 +9,7 @@ A map-first severe-weather intelligence and storm-chasing decision-support platf
 - One **historical October 27, 2026 HRRR research case**: real NOAA 2-m temperature from 12Z f06 and 15Z f03, both valid 18Z; small Plains-domain geographic images, COGs and newer-minus-older forecast comparison. Map layer is labeled archived/not current.
 - Verified GitHub Pages delivery (HTTP 200 and SHA-256 integrity), real NOAA source checks and desktop/mobile Chromium local-browser QA.
 - Behind the scenes: **hourly index-only HRRR availability checks** and a **separate five-day observation-history branch**, plus a manually dispatched, research-only near-current HRRR two-run GRIB-to-raster staging pipeline. Neither automatically publishes current HRRR fields to the map.
-- SPC probability/conditional-intensity layers remain research-only (schema surveyed), not public hazard maps. RAP source parsing remains under separate review.
+- SPC probability/conditional-intensity layers remain research-only (schema surveyed), not public hazard maps. RAP source inventory has a verified NOMADS field index; RAP GRIB content and grid remain unvalidated.
 
 No calibrated chase-target probabilities, automated routing, live model-data publication service, production soundings, radar/MRMS or independent model forecast skill validation are claimed.
 
