@@ -83,3 +83,17 @@ export function liveOverlay(candidate:LiveCandidate,id:string,mode:LiveMode,root
  const file=mode==='difference'?'difference.png':(mode==='older'?'older.png':'newer.png');
  return {url:root+'runs/'+id+'/'+file,bounds:candidate.bounds,kind:'live' as const};
 }
+
+
+/** Exact fixed rendering scales used by pipelines.hrrr_georeg.png_rgba. */
+const tempBreaks=[0,20,32,40,50,60,70,80,90,100,110];
+const tempColors=['#3f2d83','#495fb0','#3d93c4','#50b7c8','#73c7a9','#bdd37f','#f2d676','#f5a762','#e06a53','#af4557','#683258'];
+const differenceBreaks=[-15,-10,-5,-2,0,2,5,10,15];
+const differenceColors=['#3d4e9b','#537fc1','#8fbbd9','#d5e4ef','#ece9e2','#f4d8c6','#df9b7f','#b9614b','#813746'];
+export function modelPalette(mode:LiveMode):string{
+ const breaks=mode==='difference'?differenceBreaks:tempBreaks;
+ const colors=mode==='difference'?differenceColors:tempColors;
+ const lo=breaks[0],hi=breaks[breaks.length-1];
+ return 'linear-gradient(90deg,'+colors.map((color,i)=>
+   color+' '+((breaks[i]-lo)/(hi-lo)*100).toFixed(2)+'%').join(',')+')';
+}
