@@ -65,7 +65,7 @@ export function parseConvectiveManifest(value:unknown):ConvectiveManifest{
     throw new Error('GRIB cycle/lead/valid identity not verified: '+key);
    if(key.startsWith('uh25_') && (
       p.intervalStartAt!==new Date(Date.parse(value.runAt)+(lead-1)*3600_000).toISOString().replace('.000Z','Z')||
-      p.intervalEndAt!==p.validAt||p.gribMetadata?.stepType!=='max'))
+      p.intervalEndAt!==p.validAt||!object(p.gribMetadata)||p.gribMetadata.stepType!=='max'))
     throw new Error('Missing UH interval semantics');
    const q=p.geographicQA;
    if(!object(q)||typeof q.matchingCoverageFraction!=='number'||q.matchingCoverageFraction<.97||
