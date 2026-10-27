@@ -10,6 +10,22 @@ export const CONV_DISPLAY={
  srh01_f03:{title:'0–1 km storm-relative helicity',unit:'m²/s²',kind:'20Z model forecast',notice:'Model-provided storm motion; not independently derived effective-layer SRH'}
 } as const;
 export type ConvDisplayKey=keyof typeof CONV_DISPLAY;
+
+/** Fixed server-compatible color ramps, not automatic per-frame normalization. */
+export const CONV_LEGENDS:Record<ConvDisplayKey,{ticks:number[];colors:string[];unit:string;maskBelow:number|null}>={
+ refc_f03:{ticks:[-10,5,15,25,35,45,55,65,75,85],colors:['#0f2637','#28629f','#379cbd','#3eaf60','#cfd63d','#f1c231','#ef7330','#e0384b','#c045a5','#fbe8f0'],unit:'dB (simulated)',maskBelow:5},
+ uh25_max_f03:{ticks:[0,25,50,75,100,150,200,300,500],colors:['#142639','#6793c2','#65c7a2','#f3e16c','#f3a244','#e46142','#c74386','#8b49a1','#f8e1e8'],unit:'m²/s² per NOAA product inventory',maskBelow:25},
+ uh25_swath_3h:{ticks:[0,25,50,75,100,150,200,300,500],colors:['#142639','#6793c2','#65c7a2','#f3e16c','#f3a244','#e46142','#c74386','#8b49a1','#f8e1e8'],unit:'m²/s² per NOAA product inventory',maskBelow:25},
+ hgt500_f03:{ticks:[5000,5200,5300,5400,5500,5600,5700,5800,6000],colors:['#33457c','#456ba4','#5694b4','#76bcaa','#b4ce8e','#e3cd74','#eeae66','#e07f71','#92518d'],unit:'gpm',maskBelow:null},
+ t700_f03:{ticks:[223,233,243,253,263,273,283,293,303],colors:['#2e3a7f','#4577b5','#48aecc','#85c3ab','#dcdc7e','#edc166','#e58a54','#cb5356','#923a72'],unit:'K',maskBelow:null},
+ cape_sb_f03:{ticks:[0,100,250,500,1000,1500,2000,3000,4500,6500],colors:['#253347','#39749d','#46a69e','#9ac173','#ddda72','#f5bc5b','#f08451','#d94b56','#ac468d','#703894'],unit:'J/kg',maskBelow:100},
+ srh01_f03:{ticks:[-200,-100,0,50,100,150,200,300,450,650],colors:['#4e60ad','#819bbe','#d8dbd9','#efdbAA','#edbd80','#e8936e','#d3636f','#ad4b8f','#854a8f','#5a377a'],unit:'m²/s²',maskBelow:null}
+};
+export function convectiveLegendCss(key:ConvDisplayKey):string {
+ const {colors}=CONV_LEGENDS[key];
+ return 'linear-gradient(90deg,'+colors.map((c,i)=>c+' '+(100*i/(colors.length-1)).toFixed(1)+'%').join(',')+')';
+}
+
 export type ConvectiveProduct={
  field:string;runAt?:string;validAt?:string;leadHours?:number;
  png?:string;pngSHA256?:string;sourceSHA256?:string;
