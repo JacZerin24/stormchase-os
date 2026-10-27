@@ -3,6 +3,7 @@ import MapView from './components/MapView';
 import { isExpired, isRetrievalStale, NWS_INFO, SPC_CATEGORIES, SPC_INFO } from './data/weather';
 import { useWeather, type FeedState } from './hooks/useWeather';
 import { REGION_OPTIONS, type RegionKey } from './data/regions';
+import { getInitialTheme, THEME_STORAGE_KEY, type DisplayTheme } from './theme';
 
 function utc(value: string | null | undefined): string {
   if (!value) return 'Unavailable';
@@ -19,6 +20,13 @@ function Toggle({label,enabled,onChange}: {label:string;enabled:boolean;onChange
 }
 export default function App() {
   const {outlook,alerts,refresh} = useWeather();
+  const [theme,setTheme] = useState<DisplayTheme>(getInitialTheme);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',theme === 'dark' ? '#161b20' : '#f2f0e9');
+    try { window.localStorage.setItem(THEME_STORAGE_KEY,theme); } catch { /* Storage can be disabled; theme still works for this session. */ }
+  }, [theme]);
   const [showOutlook,setShowOutlook] = useState(true);
   const [showWarnings,setShowWarnings] = useState(true);
   const [outlookOpacity,setOutlookOpacity] = useState(42);
@@ -32,10 +40,10 @@ export default function App() {
   const spcOld = isRetrievalStale(outlook.lastSuccess,now);
   const nwsOld = isRetrievalStale(alerts.lastSuccess,now);
   return <div className="shell">
-    <aside className="rail" aria-hidden="true"><div className="rail-mark">S°</div><div className="rail-line"/><div className="rail-icon">◈</div><div className="rail-version">V0.1</div></aside>
+    <aside className="rail" aria-hidden="true"><div className="rail-mark">SC<span>·</span></div><div className="rail-line"/><div className="rail-icon">⌖</div><div className="rail-version">V0.1</div></aside>
     <section className={`sidebar ${sheetOpen ? 'is-open' : ''}`} aria-label="Weather data layers">
       <button type="button" className="sheet-trigger" aria-expanded={sheetOpen} aria-controls="layers-panel" onClick={() => setSheetOpen(value => !value)}><span className="sheet-handle" aria-hidden="true" /><span>LAYERS & DATA STATUS</span><span className="sheet-chevron" aria-hidden="true">{sheetOpen ? '⌄' : '⌃'}</span></button>
-      <header className="brand"><small>METEOROLOGICAL WORKSPACE</small><h1>STORMCHASE <em>OS</em></h1><div><span className="pulse"/> FORECAST INTELLIGENCE <span className="version">/ V0.1</span></div></header>
+      <header className="brand"><small>FIELD ANALYSIS / METEOROLOGY</small><h1>STORMCHASE <em>OS</em></h1><div><span className="pulse"/> OPERATIONAL ANALYSIS WORKSPACE <span className="version">/ V0.1</span></div></header>
       <div className="sidebar-scroll" id="layers-panel">
         <div className="section-index"><span>01 / MAP OPERATIONS</span><span>CONUS</span></div>
         <div className="region-control"><label htmlFor="region-select">GO TO REGION</label><select id="region-select" value={focus.region} onChange={event => focusRegion(event.currentTarget.value as RegionKey)}>{REGION_OPTIONS.map(region => <option key={region.value} value={region.value}>{region.label}</option>)}</select><p>Presets change map extent only. They are not chase targets.</p></div>
@@ -65,12 +73,12 @@ export default function App() {
     </section>
     <main className="main-area">
       <MapView outlook={outlook.data?.geometry??null} warnings={alerts.data?.geometry??null}
-        focus={focus} outlookOpacity={outlookOpacity/100}
+        focus={focus} outlookOpacity={outlookOpacity/100} theme={theme}
         showOutlook={showOutlook&&outlook.state==='ready'&&!expired&&!spcOld}
         showWarnings={showWarnings&&alerts.state==='ready'&&!nwsOld}
         onCoordinates={setCoords}/>
-      <div className="map-header"><div className="map-title"><span>◈</span><div><small>FORECAST CENTER</small><strong>Analysis Map</strong></div></div><div className="map-header-actions"><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET CONUS EXTENT</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
-      <div className="map-label">■ &nbsp; CONTIGUOUS UNITED STATES <span>/ LATEST RETRIEVED PRODUCTS</span></div>
+      <div className="map-header"><div className="map-title"><span className="map-title-mark">⌖</span><div><small>FORECAST DESK / 01</small><strong>Severe Weather Analysis</strong></div></div><div className="map-header-actions"><button type="button" className="theme-button" aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} onClick={() => setTheme(previous => previous === 'dark' ? 'light' : 'dark')}><span className="theme-glyph" aria-hidden="true">{theme === 'dark' ? '☼' : '◕'}</span><span>{theme === 'dark' ? 'LIGHT' : 'DARK'} MODE</span></button><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET VIEW</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
+      <div className="map-label"><span className="map-label-rule" aria-hidden="true" />CONTIGUOUS UNITED STATES <span>/ LATEST RETRIEVED PRODUCTS</span></div>
       <div className="map-footer"><span>{coords}</span><span className={outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'feeds-ok' : 'feeds-degraded'}><i/> {outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'FEEDS RETRIEVED · LATENCY POSSIBLE' : 'CHECK SOURCE STATUS · NOT ALERT DELIVERY'}</span></div>
     </main>
   </div>;

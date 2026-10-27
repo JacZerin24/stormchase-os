@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-27 — Dual-theme visual identity (reviewed deployment change)
+
+- Reworked the application visual language around Barlow Condensed/IBM Plex fonts, squared field-instrument panels and neutral graphite/copper styling.
+- Added warm light and charcoal dark themes, persistent theme preference (with OS-first default), and matched CARTO Positron/Dark Matter map styles.
+- Preserved live SPC and NWS overlay metadata, risk colors and refresh semantics across theme changes; added theme resolver tests and manual QA checklist.
+- Deployment and real-browser checks are tracked separately; this entry does not certify data-feed availability or operational reliability.
+
 ## Unreleased — v0.1 foundation (2026-10-27)
 
 - Created charter-aligned repository architecture, roadmap, scientific research/verification standards, data-source catalog and development guide.
