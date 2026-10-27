@@ -5,10 +5,12 @@ on:
     - cron: '37 * * * *'
   workflow_dispatch:
   push:
-    branches: [feat/hrrr-hourly-inventory-monitor]
+    branches: [main, feat/hrrr-observed-availability-history]
     paths:
       - 'pipelines/hrrr_inventory.py'
       - 'pipelines/tests/test_hrrr_inventory.py'
+      - 'pipelines/hrrr_state.py'
+      - 'pipelines/tests/test_hrrr_state.py'
       - '.github/workflows/hrrr-inventory-monitor.yml'
 permissions:
   contents: write
