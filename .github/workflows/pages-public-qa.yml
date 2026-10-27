@@ -1,0 +1,26 @@
+name: One-time public StormChase OS Pages asset acceptance
+on:
+  push:
+    branches: [test/pages-public-archive-acceptance]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-https:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify deployed Pages HTML, JS and real HRRR immutable images
+        run: python -m tools.pages_prod_probe --out reports/pages-prod-acceptance.json
+      - name: Save evidence even if site unavailable
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-public-qa
+          path: reports/pages-prod-acceptance.json
+          if-no-files-found: warn
+          retention-days: 14
