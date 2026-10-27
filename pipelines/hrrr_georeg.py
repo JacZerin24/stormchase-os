@@ -124,7 +124,7 @@ def load_field(path:Path,expected_run:datetime,expected_lead:int):
             for index in (20000,115000,450000,890000,1500000):
                 if index>=len(values):continue
                 nearest=ec.codes_grib_find_nearest(handle,float(lat[index]),float(lon[index]),npoints=1)
-                if not nearest or abs(float(nearest[0][2])-float(values[index]))>1e-5:
+                if not nearest or nearest[0].index!=index or abs(float(nearest[0].value)-float(values[index]))>1e-5:
                     raise ValueError("ecCodes independent nearest-point lookup inconsistent with coordinate arrays")
         finally:
             ec.codes_release(handle)
