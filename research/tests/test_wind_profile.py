@@ -19,7 +19,7 @@ class WindProfileTests(unittest.TestCase):
         self.assertEqual(srh(p,0,1000,5,0),(50,0,50))
     def test_bunkers_uniform_shear_reference(self):
         p=[Wind(z,z/1000.0*2,0) for z in range(0,6001,500)]
-        result=bunkers_motion(p)
+        result=bunkers_motion(p,[1000-z/10 for z in range(0,6001,500)])
         self.assertTrue(isclose(result['mean'][0],6))
         self.assertTrue(isclose(result['right'][1],-7.5))
         self.assertTrue(isclose(result['left'][1],7.5))
@@ -27,6 +27,6 @@ class WindProfileTests(unittest.TestCase):
     def test_fail_closed_on_missing_surface_or_top_and_degenerate_shear(self):
         with self.assertRaises(ValueError):checked([Wind(100,0,0),Wind(1000,1,1)])
         p=[Wind(0,1,1),Wind(6000,1,1)]
-        with self.assertRaises(ValueError):bunkers_motion(p)
+        with self.assertRaises(ValueError):bunkers_motion(p,[1000,400])
         with self.assertRaises(ValueError):bulk_shear(p,0,6500)
 if __name__=='__main__':unittest.main()
