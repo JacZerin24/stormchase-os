@@ -24,8 +24,8 @@ async def case(browser, mobile):
         is_mobile=mobile,has_touch=mobile
     )
     responses=[]
-    page.on("response",lambda response:responses.append(
-        {"url":response.url.split('/')[-1],"status":response.status}
+    page.on("response",lambda response:(
+        responses.append({"url":response.url.split('/')[-1],"status":response.status})
         if SOURCE in response.url else None))
     try:
         await page.goto(BASE,wait_until="domcontentloaded",timeout=60000)
