@@ -1,0 +1,37 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { fetchAlerts, fetchOutlook, type AlertData, type OutlookData } from '../data/weather';
+
+export interface FeedState<T> {
+  data: T | null;
+  state: 'loading' | 'ready' | 'error';
+  lastSuccess: string | null;
+  error: string | null;
+}
+const initial = <T,>(): FeedState<T> => ({data:null,state:'loading',lastSuccess:null,error:null});
+
+export function useWeather() {
+  const [outlook, setOutlook] = useState<FeedState<OutlookData>>(initial);
+  const [alerts, setAlerts] = useState<FeedState<AlertData>>(initial);
+  const controller = useRef<AbortController | null>(null);
+  const refresh = useCallback(() => {
+    controller.current?.abort();
+    const request = new AbortController();
+    controller.current = request;
+    void fetchOutlook(request.signal).then(data => {
+      if (!request.signal.aborted) setOutlook({data,state:'ready',lastSuccess:new Date().toISOString(),error:null});
+    }).catch((error: unknown) => {
+      if (!request.signal.aborted) setOutlook(prev => ({...prev,state:'error',error:error instanceof Error ? error.message:'Unknown fetch error'}));
+    });
+    void fetchAlerts(request.signal).then(data => {
+      if (!request.signal.aborted) setAlerts({data,state:'ready',lastSuccess:new Date().toISOString(),error:null});
+    }).catch((error: unknown) => {
+      if (!request.signal.aborted) setAlerts(prev => ({...prev,state:'error',error:error instanceof Error ? error.message:'Unknown fetch error'}));
+    });
+  }, []);
+  useEffect(() => {
+    refresh();
+    const interval = window.setInterval(refresh,300000);
+    return () => {window.clearInterval(interval);controller.current?.abort();};
+  },[refresh]);
+  return {outlook,alerts,refresh};
+}
