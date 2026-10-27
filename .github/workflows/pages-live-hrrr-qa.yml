@@ -1,0 +1,29 @@
+name: Public recent HRRR scientific asset delivery check
+on:
+  push:
+    branches: [test/public-hrrr-assets-acceptance]
+    paths:
+      - 'tools/pages_live_hrrr_probe.py'
+      - '.github/workflows/pages-live-hrrr-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read actual Pages model catalog and verify all public HRRR asset hashes
+        run: python -m tools.pages_live_hrrr_probe --out reports/live-hrrr-public-qa.json
+      - name: Preserve real HTTP evidence even when site fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-hrrr-image-acceptance
+          path: reports/live-hrrr-public-qa.json
+          if-no-files-found: warn
+          retention-days: 14
