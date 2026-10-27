@@ -33,6 +33,8 @@ def inspect(path: Path, expected_run: datetime, expected_lead: int) -> dict:
                 "level": int(ec.codes_get(gid,"level")),
                 "gridType": str(ec.codes_get(gid,"gridType")),
                 "numberOfPoints": int(ec.codes_get(gid,"numberOfPoints")),
+                "bitmapPresent": int(ec.codes_get(gid,"bitmapPresent")),
+                "numberOfMissing": int(ec.codes_get(gid,"numberOfMissing")),
                 "dataDate": int(ec.codes_get(gid,"dataDate")),
                 "dataTime": int(ec.codes_get(gid,"dataTime")),
                 "validityDate": int(ec.codes_get(gid,"validityDate")),
@@ -59,6 +61,10 @@ def inspect(path: Path, expected_run: datetime, expected_lead: int) -> dict:
     finite = np.isfinite(values) & (np.abs(values) < 1e20)
     if not finite.any():
         raise ValueError("No finite gridded values")
+    # A native bitmap or missing-value sentinel must never be silently filled
+    # by searching for a nearby valid point in the geographic regrid.
+    if keys["numberOfMissing"]!=0 or (~finite).any():
+        raise ValueError("GRIB has missing native cells: separate mask-aware remapping required")
     known=values[finite]
     minimum=float(known.min())
     maximum=float(known.max())
