@@ -131,6 +131,41 @@ def load_field(path:Path,expected_run:datetime,expected_lead:int):
     return lat,lon,values,report
 
 
+def spotcheck_output_against_eccodes(path:Path, area:np.ndarray, bounds=BOUNDS,step=STEP_DEG)->dict:
+    """Compare mapped pixel centers with a separate ecCodes nearest query path.
+
+    Same source GRIB, different geolocation algorithm: NOT independent NWP
+    forecast verification. A disagreement blocks publication of this pilot.
+    """
+    glon,glat=raster_grid(bounds,step)
+    rows=[15,area.shape[0]//3,area.shape[0]//2,area.shape[0]-20]
+    cols=[15,area.shape[1]//3,area.shape[1]//2,area.shape[1]-20]
+    residuals=[]
+    distances=[]
+    with path.open("rb") as fd:
+        gid=ec.codes_grib_new_from_file(fd)
+        if gid is None:raise ValueError("Failed to read GRIB during geographic QA")
+        try:
+            for r in rows:
+                for c in cols:
+                    point=ec.codes_grib_find_nearest(gid,float(glat[r,c]),float(glon[r,c])%360,npoints=1)[0]
+                    candidate=float(area[r,c])
+                    if not np.isfinite(candidate):
+                        raise ValueError("Missing mapped value at interior QA point")
+                    residuals.append(abs(candidate-float(point.value)))
+                    distances.append(float(point.distance))
+        finally:
+            ec.codes_release(gid)
+    max_error=max(residuals)
+    max_distance=max(distances)
+    if max_error>1e-3 or max_distance>MAX_NEAREST_KM:
+        raise ValueError(f"Geographic source-index mismatch: {max_error:.4g} K, {max_distance:.3f} km")
+    return {"checked_output_pixel_centers":len(residuals),
+            "max_abs_temperature_residual_K":max_error,
+            "max_eccodes_distance_km":max_distance,
+            "method":"direct ecCodes nearest query at registered output pixel centers"}
+
+
 def write_cog(destination:Path,array:np.ndarray,bounds=BOUNDS):
     """COG in EPSG:4326; pixel centers coincide with PNG image coordinates."""
     west,south,east,north=bounds
@@ -188,6 +223,7 @@ def generate(earlier:Path,later:Path,output:Path):
     for path,run,lead in ((earlier,t0,6),(later,t1,3)):
         lat,lon,values,source=load_field(path,run,lead)
         area,geo=nearest_regrid(lat,lon,values)
+        geo["eccodes_registered_pixel_spotcheck"]=spotcheck_output_against_eccodes(path,area)
         fields.append(area)
         stem=f"hrrr_{run:%Y%m%d_%H}z_f{lead:02d}_tmp2m"
         cog_name=stem+".tif";png_name=stem+".png"
