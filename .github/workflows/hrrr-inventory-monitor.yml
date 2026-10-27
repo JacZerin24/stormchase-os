@@ -1,0 +1,38 @@
+name: HRRR inventory monitor (research; metadata only)
+on:
+  schedule:
+    # Avoid top-of-hour runner contention; check once/hour, not safety-critical.
+    - cron: '37 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [feat/hrrr-hourly-inventory-monitor]
+    paths:
+      - 'pipelines/hrrr_inventory.py'
+      - 'pipelines/tests/test_hrrr_inventory.py'
+      - '.github/workflows/hrrr-inventory-monitor.yml'
+permissions:
+  contents: read
+concurrency:
+  group: hrrr-inventory-monitor
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline discovery semantics and failure tests
+        run: python -m unittest pipelines.tests.test_hrrr_inventory -v
+      - name: Probe current NOAA HRRR indices only (no GRIB download)
+        run: python -m pipelines.hrrr_inventory --out reports/hrrr-inventory.json
+      - name: Save timestamped evidence without repo/page writes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrrr-inventory-observation
+          path: reports/hrrr-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
