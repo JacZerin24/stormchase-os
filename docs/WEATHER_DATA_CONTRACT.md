@@ -1,6 +1,6 @@
 # Weather-data contract and time semantics
 
-**Status (2026-10-27): proposed interface specification, NOT a deployed API.** Coordinate future frontend/backend changes against this document. Current draft PR #1 uses local browser adapters in `web/src/data/weather.ts` and the `useWeather` hook; those exports remain the **implemented** v0.1 contract until an explicit migration PR.
+**Status (2026-10-27): provider-independent API below remains proposed, NOT deployed.** The live v0.1 adapters in `web/src/data/weather.ts` and `web/src/hooks/useWeather.ts` are merged, with official SPC Days 1–3 categorical and NWS TOR/SVR active-warning support. Real browser and production asset tests are documented. The HRRR inventory/staging and archived map are distinct research-stage pipelines, not the proposed runtime API.
 
 ## Contracts in draft v0.1
 
