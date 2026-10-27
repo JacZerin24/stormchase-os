@@ -33,3 +33,7 @@ At least once per release inspect provider data and dates, API rate/CORS behavio
 ## GitHub Pages caveats
 
 Pages is static hosting: no authoritative alert delivery, no server-side cron/reliable workers. Public repository code must not contain API keys. Use the repository's Secrets/Variables UI for future secret backend jobs.
+
+## Dependency reproducibility and known installer issue
+
+Initial PR CI failed at npm installation under npm 10 with `Cannot read properties of null (reading 'edgesOut')`; a documented optional-peer resolver defect affects recent Vitest packages. `web/.npmrc` temporarily sets `legacy-peer-deps=true`; GitHub Actions CI run #2 subsequently passed typecheck, all 7 tests and production build. This is a workaround, not evidence that all dependency security or peer-compatibility issues are resolved. Generate and commit `web/package-lock.json`, move workflows to `npm ci`, and reassess the workaround after dependency pinning. See issue #2.
