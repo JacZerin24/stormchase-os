@@ -35,6 +35,15 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
     map.on('moveend',update);
     update();
     map.on('error',()=>setMapError('Map style or tiles failed to load. Check the network connection.'));
+    // Register click handlers once: theme switches should never duplicate popups.
+    map.on('click','spc-fill',(e)=>{
+      const dn=Number(e.features?.[0]?.properties?.dn);
+      new maplibregl.Popup().setLngLat(e.lngLat).setText('SPC Day 1 · '+(SPC_CATEGORIES[dn]?.label??'Category unknown')).addTo(map);
+    });
+    map.on('click','warning-fill',(e)=>{
+      const p=e.features?.[0]?.properties;
+      new maplibregl.Popup().setLngLat(e.lngLat).setText(String(p?.headline??p?.event??'NWS warning')).addTo(map);
+    });
     // style.load fires after the initial load and every light/dark basemap change.
     // Recreate custom overlays because MapLibre setStyle replaces style sources/layers.
     map.on('style.load',()=>{
@@ -44,14 +53,6 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
       map.addLayer({id:'spc-line',type:'line',source:'spc-day1',layout:{'line-sort-key':['get','dn']},paint:{'line-color':categoryColor,'line-width':1.5}});
       map.addLayer({id:'warning-fill',type:'fill',source:'nws-warnings',paint:{'fill-color':warningColor,'fill-opacity':0.28}});
       map.addLayer({id:'warning-line',type:'line',source:'nws-warnings',paint:{'line-color':warningColor,'line-width':2.4}});
-      map.on('click','spc-fill',(e)=>{
-        const dn=Number(e.features?.[0]?.properties?.dn);
-        new maplibregl.Popup().setLngLat(e.lngLat).setText('SPC Day 1 · '+(SPC_CATEGORIES[dn]?.label??'Category unknown')).addTo(map);
-      });
-      map.on('click','warning-fill',(e)=>{
-        const p=e.features?.[0]?.properties;
-        new maplibregl.Popup().setLngLat(e.lngLat).setText(String(p?.headline??p?.event??'NWS warning')).addTo(map);
-      });
       setStyleEpoch(epoch => epoch + 1);
     });
     return () => { mapRef.current=null;map.remove(); };
@@ -74,11 +75,12 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
     const m=mapRef.current;
     if (styleEpoch && m?.getLayer('spc-fill')) m.setPaintProperty('spc-fill','fill-opacity',outlookOpacity);
   },[styleEpoch,outlookOpacity]);
+  const mapReady = styleEpoch > 0;
   useEffect(()=>{
     const m=mapRef.current;
-    if (styleEpoch && m) m.fitBounds(REGION_BOUNDS[focus.region], {padding:36,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450,maxZoom:7});
+    if (mapReady && m) m.fitBounds(REGION_BOUNDS[focus.region], {padding:36,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450,maxZoom:7});
     // A basemap switch does not change the user-selected extent or zoom.
-  },[styleEpoch > 0,focus]);
+  },[mapReady,focus]);
   useEffect(() => {
     if (appliedTheme.current === theme) return;
     appliedTheme.current = theme;
