@@ -1,5 +1,12 @@
 # Feature Inventory and Roadmap
 
+## Phase 1 — Near-current HRRR publishing (research beta, October 2026)
+
+- A **source-qualified regional pilot** now has a reviewable hourly publishing workflow, reusable NOAA GRIB2 two-run staging, validated output content hashes, an immutable six-valid-hour cache carried as short-lived Actions artifacts, and a client-side current-model panel with UTC run/valid-time selection, a previous-cycle comparison and explicit stale/unavailable display. The initial field is **2-m temperature**. This is intentionally narrower than the 69 HRRR fields available in the source catalog.
+- Backend gates include real NOAA GRIB cycle/forecast validity, fixed spatial region, native GRIB missing-value checks, geolocation reference pixel checks, reproducible COG/PNG hashes, cache retention/size caps and fail-closed deployment. One successful feature-branch source test and desktop/mobile Chromium browser QA establish the engineering pipeline; **successful production publishing must be confirmed on main after merging this work**.
+- Source and process times are separate, GitHub Actions scheduling is best effort, and neither this nor the historic convective model viewer is an official warning/observational product or independently forecast-skill verified. On missed updates the client hides stale model overlays instead of presenting them as current.
+- **Next releases:** migrate from the temporary regional temperature pilot to verified simulated reflectivity/other convective and upper-air fields, additional forecast valid hours, vector/contour plots, true UH forecast-object tracking, independent numerical/bitmap validation and affordable scalable hosting.
+
 ## Convection Desk expansion — October 27, 2026
 
 The HRRR workstream is expanded from temperature-only research to a complete severe-convection field architecture (see [HRRR CONVECTION ROADMAP](HRRR_CONVECTION_ROADMAP.md)). Official NCEP/NODD actual `wrfsfc` index testing matched **69/69 configured field, level and time-window identities** on the audited 17Z f02 run. This includes REFC, hourly 2–5 and 0–2 km UH max/min, updraft, CAPE/CIN variants, storm-relative helicity, vertical shear components, 250/300/500/700/850/925 hPa data, precipitation windows and near-surface parameters.
