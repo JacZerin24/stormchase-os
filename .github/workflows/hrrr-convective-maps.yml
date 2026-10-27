@@ -22,7 +22,9 @@ jobs:
       - name: Mathematical source-window checks
         run: python -m unittest pipelines.tests.test_hrrr_convective_render -v
       - name: Fetch authentic 8 NOAA GRIB messages, georegister and create archived fields
-        run: python -m pipelines.hrrr_convective_render --out web/public/pilot/hrrr-convective-20261027-20z
+        run: |
+          rm -rf web/public/pilot/hrrr-convective-20261027-20z
+          python -m pipelines.hrrr_convective_render --out web/public/pilot/hrrr-convective-20261027-20z
       - name: Commit only verified small archive results to reviewable branch
         run: |
           git config user.name 'github-actions[bot]'
