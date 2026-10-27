@@ -11,3 +11,13 @@ The manifest records actual checked, process, cycle and valid times, transfer by
 Manual command with pinned scientific dependencies: python -m pipelines.hrrr_stage --out reports/recent-hrrr
 
 Sources: https://registry.opendata.aws/noaa-hrrr-pds/ and NOAA EMC HRRR documentation.
+
+## Verified real NOAA execution — October 27, 2026
+
+GitHub Actions run: https://github.com/JacZerin24/stormchase-os/actions/runs/40566089453
+
+At the check time, the source inventory selected genuine hourly HRRR 16Z f03 and 17Z f02 temperature fields, both valid 19Z. The pinned ecCodes/rasterio/scipy stack passed 19 deterministic tests, then performed a real two-message byte-range acquisition, decoded the values, georegistered the existing Southern Plains domain, and generated the COG/PNG images and forecast-cycle difference.
+
+Measured in this run: source message transfer **2,360,308 bytes**; total raster and PNG assets (excluding manifest) **184,351 bytes**; Python end-to-end execution walltime **29.925 seconds**. These are workload observations, NOT a complete estimate of future Github Actions billing or network egress. The dependencies installation, queue time, Pages deployment and user serving are not included in that walltime metric. External independent forecast-field accuracy verification is still outstanding.
+
+The complete artifacts are intentionally retained for seven days rather than promoted to public current-model maps. Publication/source latency cannot be established from one opportunistic index observation.
