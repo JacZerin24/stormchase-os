@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {HRRR_PILOT_PATH,parsePilotManifest,pilotOverlay,type PilotManifest,type PilotMode} from './data/hrrrPilot';
 import {CONV_ARCHIVE_PATH,CONV_DISPLAY,CONV_LEGENDS,convectiveLegendCss,convectiveImage,parseConvectiveManifest,type ConvectiveManifest,type ConvDisplayKey} from './data/hrrrConvective';
 import MapView from './components/MapView';
-import {LIVE_ROOT,parseLiveCatalog,parseLiveCandidate,liveFreshness,liveOverlay,type LiveCatalog,type LiveCandidate,type LiveMode} from './data/hrrrLive';
+import {LIVE_ROOT,parseLiveCatalog,parseLiveCandidate,liveFreshness,liveOverlay,modelPalette,type LiveCatalog,type LiveCandidate,type LiveMode} from './data/hrrrLive';
 import {activeWarningGeometry,NWS_INFO,SPC_CATEGORIES,SPC_INFO} from './data/weather';
 import {outlookHealth,warningHealth,type WeatherHealth} from './data/freshness';
 import {useWeather} from './hooks/useWeather';
@@ -186,9 +186,7 @@ export default function App() {
             </div>
             <div className="convective-legend">
               <div className="legend-range-heading">{liveMode==='difference'?'MODEL FORECAST CHANGE · °F':'FIXED TEMPERATURE SCALE · °F'}</div>
-              <div className="legend-color-ramp" style={{background:liveMode==='difference'?
-                'linear-gradient(90deg,#3d4e9b,#8fbbd9,#ece9e2,#df9b7f,#813746)':
-                'linear-gradient(90deg,#3f2d83,#496fb0,#3d93c4,#73c7a9,#f2d676,#e06a53,#683258)'}}/>
+              <div className="legend-color-ramp" style={{background:modelPalette(liveMode)}}/>
               <div className="legend-color-ticks"><span>{liveMode==='difference'?'−15':'0'}</span><span>{liveMode==='difference'?'0':'60'}</span><span>{liveMode==='difference'?'+15':'110'}</span></div>
             </div>
             <button type="button" className="model-focus" onClick={()=>{setLiveEnabled(true);setPilotEnabled(false);setConvectiveEnabled(false);setPilotFocusRevision(i=>i+1)}}>FOCUS VALIDATED MODEL DOMAIN</button>
