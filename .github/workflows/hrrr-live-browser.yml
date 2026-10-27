@@ -1,0 +1,53 @@
+name: Source-verified recent HRRR browser acceptance
+on:
+  push:
+    branches: [feat/hrrr-live-controlled-publisher]
+    paths:
+      - 'web/src/**'
+      - 'tools/hrrr_live_browser.py'
+      - '.github/workflows/hrrr-live-browser.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download actual source-verified recent GRIB-derived cache
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p web/public/live/hrrr
+          gh run download 40586637851 -n hrrr-live-cache -D web/public/live/hrrr
+      - name: Install locked web and browser environment
+        run: |
+          cd web
+          npm ci --no-audit --no-fund
+          npm run build
+          cd ..
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+      - name: Verify source-checked forecast map and stale labels on two viewports
+        run: |
+          cd web
+          npm run dev -- --host 127.0.0.1 --port 4173 >../vite-recent.log 2>&1 &
+          cd ..
+          python tools/hrrr_live_browser.py
+      - name: Preserve QA evidence even if browser fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recent-hrrr-browser-screenshots
+          path: |
+            browser-artifacts/
+            vite-recent.log
+          if-no-files-found: warn
+          retention-days: 14
