@@ -22,7 +22,7 @@ from PIL import Image
 import eccodes as ec
 
 # Fixed QA pilot domain, not a chase-target recommendation.
-BOUNDS = (-103.0, 33.0, -94.0, 39.5)  # west, south, east, north
+BOUNDS = (-103.0, 33.0, -94.0, 39.4)  # west, south, east, north
 STEP_DEG = 0.04
 EARTH_RADIUS_KM = 6371.0088
 MAX_NEAREST_KM = 5.0
