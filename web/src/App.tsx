@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {HRRR_PILOT_PATH,parsePilotManifest,pilotOverlay,type PilotManifest,type PilotMode} from './data/hrrrPilot';
 import MapView from './components/MapView';
 import {activeWarningGeometry,NWS_INFO,SPC_CATEGORIES,SPC_INFO} from './data/weather';
@@ -56,8 +56,9 @@ export default function App() {
     });
     return ()=>abort.abort();
   },[]);
-  const pilotImage=pilotEnabled && pilotManifest ?
-    pilotOverlay(pilotManifest,pilotMode,import.meta.env.BASE_URL+HRRR_PILOT_PATH) : null;
+  const pilotImage=useMemo(()=>pilotEnabled && pilotManifest ?
+    pilotOverlay(pilotManifest,pilotMode,import.meta.env.BASE_URL+HRRR_PILOT_PATH) : null,
+    [pilotEnabled,pilotManifest,pilotMode]);
   return <div className="shell">
     <aside className="rail" aria-hidden="true"><div className="rail-mark">SC<span>·</span></div><div className="rail-line"/><div className="rail-icon">⌖</div><div className="rail-version">V0.1</div></aside>
     <section className={`sidebar ${sheetOpen ? 'is-open' : ''}`} aria-label="Weather data layers">
