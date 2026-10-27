@@ -69,7 +69,7 @@ export default function App() {
         showOutlook={showOutlook&&outlook.state==='ready'&&!expired&&!spcOld}
         showWarnings={showWarnings&&alerts.state==='ready'&&!nwsOld}
         onCoordinates={setCoords}/>
-      <div className="map-header"><div className="map-title"><span>◈</span><div><small>FORECAST CENTER</small><strong>National Overview</strong></div></div><div className="map-header-actions"><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET CONUS EXTENT</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
+      <div className="map-header"><div className="map-title"><span>◈</span><div><small>FORECAST CENTER</small><strong>Analysis Map</strong></div></div><div className="map-header-actions"><button type="button" className="extent-reset" onClick={() => focusRegion('conus')}>RESET CONUS EXTENT</button><div className="map-utc"><b>UTC</b> {new Date(now).toISOString().slice(0,16).replace('T',' · ')}</div></div></div>
       <div className="map-label">■ &nbsp; CONTIGUOUS UNITED STATES <span>/ LATEST RETRIEVED PRODUCTS</span></div>
       <div className="map-footer"><span>{coords}</span><span className={outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'feeds-ok' : 'feeds-degraded'}><i/> {outlook.state==='ready' && alerts.state==='ready' && !expired && !spcOld && !nwsOld ? 'FEEDS RETRIEVED · LATENCY POSSIBLE' : 'CHECK SOURCE STATUS · NOT ALERT DELIVERY'}</span></div>
     </main>

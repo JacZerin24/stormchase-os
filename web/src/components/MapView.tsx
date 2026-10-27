@@ -71,7 +71,7 @@ export default function MapView({outlook,warnings,showOutlook,showWarnings,onCoo
   },[ready,outlookOpacity]);
   useEffect(()=>{
     const m=mapRef.current;
-    if (ready && m) m.fitBounds(REGION_BOUNDS[focus.region], {padding:36,duration:450,maxZoom:7});
+    if (ready && m) m.fitBounds(REGION_BOUNDS[focus.region], {padding:36,duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 450,maxZoom:7});
   },[ready,focus]);
   return <div className="map-host">
     <div ref={element} className="map-canvas" role="application" aria-label="Interactive CONUS weather map" />

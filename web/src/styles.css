@@ -49,3 +49,14 @@
  .maplibregl-ctrl-bottom-right{bottom:92px}
 }
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none}.track>span{transition:none}}
+
+/* Legible operational readouts; source-state is visible when the mobile sheet is closed. */
+.layer-name strong{font-size:13px}
+.meta dt,.meta dd,.caveat,.disclaimer{font-size:11px}
+.legend-entry small{font-size:10px}
+.map-footer>span.feeds-degraded:last-child{color:#efbd9e}
+.map-footer>span.feeds-degraded:last-child i{background:#ea9b63}
+@media(max-width:680px){
+ .map-footer>span:first-child{display:none}
+ .map-footer>span:last-child{display:block;text-align:left;max-width:100%;font-size:10px}
+}
