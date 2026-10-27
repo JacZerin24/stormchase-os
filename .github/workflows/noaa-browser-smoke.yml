@@ -1,0 +1,46 @@
+name: Experimental Chromium NOAA browser smoke
+on:
+  push:
+    branches: [feat/weather-data-health-contract]
+    paths:
+      - 'tools/browser_smoke.py'
+      - 'web/src/data/weather.ts'
+      - '.github/workflows/noaa-browser-smoke.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install locked frontend packages
+        working-directory: web
+        run: npm ci --no-audit --no-fund
+      - name: Install Playwright Chromium
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+      - name: Start Vite locally and exercise browser
+        run: |
+          cd web
+          npm run dev -- --host 127.0.0.1 --port 4173 >../vite-browser.log 2>&1 &
+          cd ..
+          python tools/browser_smoke.py
+      - name: Preserve browser screenshots and metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chromium-weather-browser-smoke
+          path: |
+            browser-artifacts/
+            vite-browser.log
+          if-no-files-found: warn
+          retention-days: 14
