@@ -121,10 +121,10 @@ def verify(cache:Path)->dict:
         if m.get("schema")!="stormchase-hrrr-live-candidate/1" or m.get("calibratedSevereWeatherProbability") is not False:
             raise ValueError("Invalid scientific data type")
         for x in m["images"]:
-            if x["file"] not in ("older.png","newer.png"):
-                raise ValueError("Unexpected image filename")
-            if hashfile(root/x["file"])!=x["sha256"]:
-                raise ValueError("Stored HRRR PNG changed")
+            if x["file"] not in ("older.png","newer.png") or x.get("cog") not in ("older.tif","newer.tif"):
+                raise ValueError("Unexpected image/COG filename")
+            if hashfile(root/x["file"])!=x["sha256"] or hashfile(root/x["cog"])!=x["cogSha256"]:
+                raise ValueError("Stored HRRR PNG/COG changed")
         if hashfile(root/"difference.png")!=m["difference"]["sha256"]:
             raise ValueError("Stored HRRR cycle-difference changed")
     return result
