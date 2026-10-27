@@ -1,0 +1,152 @@
+{
+  "schema": "stormchase-hrrr-archived-pilot/1",
+  "status": "historical-experimental-display-not-live",
+  "provider": "NOAA NODD HRRR public archive",
+  "sourceGribLicense": "NOAA public forecast data; check source terms for downstream redistribution",
+  "generatedAt": "2026-10-27T18:30:20.401266Z",
+  "validAt": "2026-10-27T18:00:00Z",
+  "bounds": [
+    -103.0,
+    33.0,
+    -94.0,
+    39.4
+  ],
+  "rasterStepDegrees": 0.04,
+  "rasterCrs": "EPSG:4326",
+  "spatialMethod": "spherical nearest-neighbor within 5 km; no extrapolation",
+  "temperaturePaletteF": {
+    "breaks": [
+      0.0,
+      20.0,
+      32.0,
+      40.0,
+      50.0,
+      60.0,
+      70.0,
+      80.0,
+      90.0,
+      100.0,
+      110.0
+    ],
+    "colors": [
+      [
+        63,
+        45,
+        131
+      ],
+      [
+        73,
+        95,
+        176
+      ],
+      [
+        61,
+        147,
+        196
+      ],
+      [
+        80,
+        183,
+        200
+      ],
+      [
+        115,
+        199,
+        169
+      ],
+      [
+        189,
+        211,
+        127
+      ],
+      [
+        242,
+        214,
+        118
+      ],
+      [
+        245,
+        167,
+        98
+      ],
+      [
+        224,
+        106,
+        83
+      ],
+      [
+        175,
+        69,
+        87
+      ],
+      [
+        104,
+        50,
+        88
+      ]
+    ]
+  },
+  "differencePaletteF": {
+    "bounds": [
+      -15,
+      15
+    ],
+    "units": "deg F change between run initializations"
+  },
+  "products": [
+    {
+      "model": "HRRR",
+      "parameter": "TMP",
+      "level": "2 m above ground",
+      "units": "K",
+      "runAt": "2026-10-27T12:00:00Z",
+      "leadHours": 6,
+      "validAt": "2026-10-27T18:00:00Z",
+      "image": "hrrr_20261027_12z_f06_tmp2m.png",
+      "cog": "hrrr_20261027_12z_f06_tmp2m.tif",
+      "grib_sha256": "183e75c9d4d036953c915dba02971861c7b5872f937c707f56d38f71c0bd18b1",
+      "image_sha256": "b701e8a9e314791cdf5a0db5112e80d2bbd3b311dd8bb139804a40172dd5953a",
+      "cog_sha256": "24fca0310d4d897be7e0a8638f00650012374344e4c7a7527be75ac44965a13d",
+      "geolocation_QA": {
+        "coverage_fraction": 1.0,
+        "max_nearest_km": 2.106462417004483,
+        "p95_nearest_km": 1.7961306669489205,
+        "median_nearest_km": 1.195806276906632,
+        "unmatched_cells": 0,
+        "source_valid_points_in_buffer": 71024
+      },
+      "min_K": 281.0657043457031,
+      "max_K": 300.6282043457031
+    },
+    {
+      "model": "HRRR",
+      "parameter": "TMP",
+      "level": "2 m above ground",
+      "units": "K",
+      "runAt": "2026-10-27T15:00:00Z",
+      "leadHours": 3,
+      "validAt": "2026-10-27T18:00:00Z",
+      "image": "hrrr_20261027_15z_f03_tmp2m.png",
+      "cog": "hrrr_20261027_15z_f03_tmp2m.tif",
+      "grib_sha256": "137c030fc54dfd5cb2c12b0cb7a0f3bb78bf3498814fdd5e7ff4a31ead333d82",
+      "image_sha256": "dd5732d7b5f0936beccc181ee66c92ddfec54d1b2797e35a43c95c110720e18e",
+      "cog_sha256": "bfdf04a00df6bd3df91058062fd00b59a0af7d6556b8165f71d2f930fe83c0e7",
+      "geolocation_QA": {
+        "coverage_fraction": 1.0,
+        "max_nearest_km": 2.106462417004483,
+        "p95_nearest_km": 1.7961306669489205,
+        "median_nearest_km": 1.195806276906632,
+        "unmatched_cells": 0,
+        "source_valid_points_in_buffer": 71024
+      },
+      "min_K": 281.4867858886719,
+      "max_K": 300.2992858886719
+    }
+  ],
+  "differenceImage": "hrrr_valid18z_delta.png",
+  "difference_sha256": "cda7d0dbc8c7e61306ca52bf06de497ae54ce355a616709304fbab323190260a",
+  "difference_min_K": -2.89141845703125,
+  "difference_max_K": 3.60858154296875,
+  "independentForecastVerification": "not performed",
+  "nativeGridQA": "basic GRIB identity/ecCodes coordinate checks only"
+}
