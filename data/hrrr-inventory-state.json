@@ -2,7 +2,7 @@
   "schema": "stormchase-hrrr-observation-history/1",
   "model": "HRRR",
   "field": "TMP:2 m above ground",
-  "updatedAt": "2026-11-07T10:37:11Z",
+  "updatedAt": "2026-11-07T16:58:13Z",
   "records": {
     "2026-11-02T16:00:00Z__f03__TMP2m": {
       "runAt": "2026-11-02T16:00:00Z",
@@ -471,10 +471,36 @@
       "lastObservedStatus": "inventory_observed",
       "latestObservationAt": "2026-11-07T10:37:11Z",
       "indexBecameObservableBetween": null
+    },
+    "2026-11-07T14:00:00Z__f03__TMP2m": {
+      "runAt": "2026-11-07T14:00:00Z",
+      "leadHours": 3,
+      "validAt": "2026-11-07T17:00:00Z",
+      "firstObservedIndexAt": "2026-11-07T16:58:13Z",
+      "lastObservedIndexAt": "2026-11-07T16:58:13Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-07T14:56:58Z",
+      "sourceIndexETag": "\"c7567f31d42f354be1c9226508759176\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-07T16:58:13Z",
+      "indexBecameObservableBetween": null
+    },
+    "2026-11-07T15:00:00Z__f02__TMP2m": {
+      "runAt": "2026-11-07T15:00:00Z",
+      "leadHours": 2,
+      "validAt": "2026-11-07T17:00:00Z",
+      "firstObservedIndexAt": "2026-11-07T16:58:13Z",
+      "lastObservedIndexAt": "2026-11-07T16:58:13Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-07T15:55:43Z",
+      "sourceIndexETag": "\"8097b6813ab31857bb0a29373bbf6f4b\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-07T16:58:13Z",
+      "indexBecameObservableBetween": null
     }
   },
-  "recordsRetained": 36,
-  "positiveIndexRecords": 36,
+  "recordsRetained": 38,
+  "positiveIndexRecords": 38,
   "availabilityWindowBoundedRecords": 0,
   "interpretation": "First seen is StormChase OS observation, not NOAA original publication. An observed 404-to-200 interval bounds index accessibility, not GRIB completeness."
 }
