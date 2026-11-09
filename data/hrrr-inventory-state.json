@@ -2,60 +2,8 @@
   "schema": "stormchase-hrrr-observation-history/1",
   "model": "HRRR",
   "field": "TMP:2 m above ground",
-  "updatedAt": "2026-11-08T19:54:19Z",
+  "updatedAt": "2026-11-09T07:04:14Z",
   "records": {
-    "2026-11-03T21:00:00Z__f03__TMP2m": {
-      "runAt": "2026-11-03T21:00:00Z",
-      "leadHours": 3,
-      "validAt": "2026-11-04T00:00:00Z",
-      "firstObservedIndexAt": "2026-11-03T23:36:36Z",
-      "lastObservedIndexAt": "2026-11-03T23:36:36Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-03T22:02:50Z",
-      "sourceIndexETag": "\"1eec2119f327ad91b30ebd34509e0e59\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-03T23:36:36Z",
-      "indexBecameObservableBetween": null
-    },
-    "2026-11-03T22:00:00Z__f02__TMP2m": {
-      "runAt": "2026-11-03T22:00:00Z",
-      "leadHours": 2,
-      "validAt": "2026-11-04T00:00:00Z",
-      "firstObservedIndexAt": "2026-11-03T23:36:36Z",
-      "lastObservedIndexAt": "2026-11-03T23:36:36Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-03T22:54:49Z",
-      "sourceIndexETag": "\"37d0f66c81f614dd3b4b3ce5641dbd4e\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-03T23:36:36Z",
-      "indexBecameObservableBetween": null
-    },
-    "2026-11-04T00:00:00Z__f03__TMP2m": {
-      "runAt": "2026-11-04T00:00:00Z",
-      "leadHours": 3,
-      "validAt": "2026-11-04T03:00:00Z",
-      "firstObservedIndexAt": "2026-11-04T03:11:03Z",
-      "lastObservedIndexAt": "2026-11-04T03:11:03Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-04T00:55:14Z",
-      "sourceIndexETag": "\"7350a305990b849332a72f671562dc4c\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-04T03:11:03Z",
-      "indexBecameObservableBetween": null
-    },
-    "2026-11-04T01:00:00Z__f02__TMP2m": {
-      "runAt": "2026-11-04T01:00:00Z",
-      "leadHours": 2,
-      "validAt": "2026-11-04T03:00:00Z",
-      "firstObservedIndexAt": "2026-11-04T03:11:03Z",
-      "lastObservedIndexAt": "2026-11-04T03:11:03Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-04T01:55:20Z",
-      "sourceIndexETag": "\"8dd13e729f2cbc3eac3d936daa297462\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-04T03:11:03Z",
-      "indexBecameObservableBetween": null
-    },
     "2026-11-04T08:00:00Z__f03__TMP2m": {
       "runAt": "2026-11-04T08:00:00Z",
       "leadHours": 3,
@@ -523,10 +471,36 @@
       "lastObservedStatus": "inventory_observed",
       "latestObservationAt": "2026-11-08T19:54:19Z",
       "indexBecameObservableBetween": null
+    },
+    "2026-11-09T04:00:00Z__f03__TMP2m": {
+      "runAt": "2026-11-09T04:00:00Z",
+      "leadHours": 3,
+      "validAt": "2026-11-09T07:00:00Z",
+      "firstObservedIndexAt": "2026-11-09T07:04:14Z",
+      "lastObservedIndexAt": "2026-11-09T07:04:14Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-09T04:56:21Z",
+      "sourceIndexETag": "\"096c7e6b5baac684ac4c3f80b91f600f\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-09T07:04:14Z",
+      "indexBecameObservableBetween": null
+    },
+    "2026-11-09T05:00:00Z__f02__TMP2m": {
+      "runAt": "2026-11-09T05:00:00Z",
+      "leadHours": 2,
+      "validAt": "2026-11-09T07:00:00Z",
+      "firstObservedIndexAt": "2026-11-09T07:04:14Z",
+      "lastObservedIndexAt": "2026-11-09T07:04:14Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-09T05:55:06Z",
+      "sourceIndexETag": "\"8e1eca0ca101fd79b9caf51af6cfe3d0\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-09T07:04:14Z",
+      "indexBecameObservableBetween": null
     }
   },
-  "recordsRetained": 40,
-  "positiveIndexRecords": 40,
+  "recordsRetained": 38,
+  "positiveIndexRecords": 38,
   "availabilityWindowBoundedRecords": 0,
   "interpretation": "First seen is StormChase OS observation, not NOAA original publication. An observed 404-to-200 interval bounds index accessibility, not GRIB completeness."
 }
