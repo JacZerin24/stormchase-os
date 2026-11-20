@@ -2,34 +2,8 @@
   "schema": "stormchase-hrrr-observation-history/1",
   "model": "HRRR",
   "field": "TMP:2 m above ground",
-  "updatedAt": "2026-11-20T02:31:54Z",
+  "updatedAt": "2026-11-20T10:22:10Z",
   "records": {
-    "2026-11-15T07:00:00Z__f03__TMP2m": {
-      "runAt": "2026-11-15T07:00:00Z",
-      "leadHours": 3,
-      "validAt": "2026-11-15T10:00:00Z",
-      "firstObservedIndexAt": "2026-11-15T09:48:11Z",
-      "lastObservedIndexAt": "2026-11-15T09:48:11Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-15T07:57:20Z",
-      "sourceIndexETag": "\"ef451afa5fc5c63cce37939f20491a47\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-15T09:48:11Z",
-      "indexBecameObservableBetween": null
-    },
-    "2026-11-15T08:00:00Z__f02__TMP2m": {
-      "runAt": "2026-11-15T08:00:00Z",
-      "leadHours": 2,
-      "validAt": "2026-11-15T10:00:00Z",
-      "firstObservedIndexAt": "2026-11-15T09:48:11Z",
-      "lastObservedIndexAt": "2026-11-15T09:48:11Z",
-      "lastObserved404At": null,
-      "sourceIndexLastModified": "2026-11-15T08:55:35Z",
-      "sourceIndexETag": "\"88e5da16557c61c8563884662940fc9d\"",
-      "lastObservedStatus": "inventory_observed",
-      "latestObservationAt": "2026-11-15T09:48:11Z",
-      "indexBecameObservableBetween": null
-    },
     "2026-11-15T14:00:00Z__f03__TMP2m": {
       "runAt": "2026-11-15T14:00:00Z",
       "leadHours": 3,
@@ -418,6 +392,32 @@
       "sourceIndexETag": "\"11f0dc9477d4735e1784809acb7146a1\"",
       "lastObservedStatus": "inventory_observed",
       "latestObservationAt": "2026-11-20T02:31:54Z",
+      "indexBecameObservableBetween": null
+    },
+    "2026-11-20T07:00:00Z__f03__TMP2m": {
+      "runAt": "2026-11-20T07:00:00Z",
+      "leadHours": 3,
+      "validAt": "2026-11-20T10:00:00Z",
+      "firstObservedIndexAt": "2026-11-20T10:22:10Z",
+      "lastObservedIndexAt": "2026-11-20T10:22:10Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-20T07:57:04Z",
+      "sourceIndexETag": "\"58fb5aa1f4caa27f804a736f7e5f78df\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-20T10:22:10Z",
+      "indexBecameObservableBetween": null
+    },
+    "2026-11-20T08:00:00Z__f02__TMP2m": {
+      "runAt": "2026-11-20T08:00:00Z",
+      "leadHours": 2,
+      "validAt": "2026-11-20T10:00:00Z",
+      "firstObservedIndexAt": "2026-11-20T10:22:10Z",
+      "lastObservedIndexAt": "2026-11-20T10:22:10Z",
+      "lastObserved404At": null,
+      "sourceIndexLastModified": "2026-11-20T08:55:50Z",
+      "sourceIndexETag": "\"4e18d685652ed56ace11735092650c8e\"",
+      "lastObservedStatus": "inventory_observed",
+      "latestObservationAt": "2026-11-20T10:22:10Z",
       "indexBecameObservableBetween": null
     }
   },
